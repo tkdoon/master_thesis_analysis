@@ -6,7 +6,7 @@ import os
 
 
 class Smarteye_analysis():
-    def __init__(self,subject_num:int,experiment_num:int=None,experiment_nums:list[int]=None,smarteye_df:pd.DataFrame=None,smarteye_dfs:list[pd.DataFrame]=None) -> None:
+    def __init__(self,subject_num:int,experiment_num:int=None,experiment_nums:list[int]=None,smarteye_df:pd.DataFrame=None,smarteye_dfs:list[pd.DataFrame]=None,path_to_data_dir=r"C:\Users\tyasu\Desktop\修士研究用") -> None:
         self.subject_num=subject_num
         self.experiment_num=experiment_num
         self.experiment_nums=experiment_nums
@@ -16,6 +16,7 @@ class Smarteye_analysis():
             self.smarteye_np=smarteye_df.values
             self.time_array=np.divide(self.smarteye_np[:,0].astype(int)-int(self.smarteye_np[0,0]),self.sampling_frequency)
         self.smarteye_dfs=smarteye_dfs
+        self.path_to_data_dir=path_to_data_dir
         
     def fix_data(self,np_data:np.array)->np.array:
         # 直前の値に置き換える
@@ -61,9 +62,9 @@ class Smarteye_analysis():
         plt.ylabel('gaze direction')
         plt.legend()
         if store:
-            if not os.path.exists(fr"C:\Users\tyasu\Desktop\修士研究用\解析データ\{self.subject_num}\smarteye\gaze_direction"):
-                os.makedirs(fr"C:\Users\tyasu\Desktop\修士研究用\解析データ\{self.subject_num}\smarteye\gaze_direction")
-            plt.savefig(fr"C:\Users\tyasu\Desktop\修士研究用\解析データ\{self.subject_num}\smarteye\gaze_direction\gaze_direction_{self.experiment_num}.png")
+            if not os.path.exists(os.path.join(self.path_to_data_dir,fr"解析データ\{self.subject_num}\smarteye\gaze_direction")):
+                os.makedirs(os.path.join(self.path_to_data_dir,fr"解析データ\{self.subject_num}\smarteye\gaze_direction"))
+            plt.savefig(os.path.join(self.path_to_data_dir,fr"解析データ\{self.subject_num}\smarteye\gaze_direction\gaze_direction_{self.experiment_num}.png"))
         if show:
             plt.show()
         else:
@@ -92,9 +93,9 @@ class Smarteye_analysis():
             plt.suptitle(large_title)
         plt.tight_layout()
         if store:
-            if not os.path.exists(fr"C:\Users\tyasu\Desktop\修士研究用\解析データ\{self.subject_num}\smarteye\gaze_direction"):
-                os.makedirs(fr"C:\Users\tyasu\Desktop\修士研究用\解析データ\{self.subject_num}\smarteye\gaze_direction")
-            plt.savefig(fr"C:\Users\tyasu\Desktop\修士研究用\解析データ\{self.subject_num}\smarteye\gaze_direction\multi_gaze_direction_{filename}.png")
+            if not os.path.exists(os.path.join(self.path_to_data_dir,fr"解析データ\{self.subject_num}\smarteye\gaze_direction")):
+                os.makedirs(os.path.join(self.path_to_data_dir,fr"解析データ\{self.subject_num}\smarteye\gaze_direction"))
+            plt.savefig(os.path.join(self.path_to_data_dir,fr"解析データ\{self.subject_num}\smarteye\gaze_direction\multi_gaze_direction_{filename}.png"))
         if show:
             plt.show()
         else:

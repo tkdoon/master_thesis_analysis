@@ -6,7 +6,7 @@ import japanize_matplotlib
 
 
 class DS_log_analysis():
-    def __init__(self,subject_num,experiment_num:int=None,experiment_nums:list=None,df:pd.DataFrame=None,dfs:list=None):
+    def __init__(self,subject_num,experiment_num:int=None,experiment_nums:list=None,df:pd.DataFrame=None,dfs:list=None,path_to_data_dir=r"C:\Users\tyasu\Desktop\修士研究用"):
         self.experiment_num = experiment_num
         self.subject_num =subject_num
         self.DS_log_df:pd.DataFrame=df
@@ -14,15 +14,16 @@ class DS_log_analysis():
             self.DS_log_np=self.DS_log_df.values
             self.times_np=self.DS_log_np[:,11]-self.DS_log_np[0,11]
             self.velocity_array=self.DS_log_np[:,34]
-        if not os.path.exists(fr"C:\Users\tyasu\Desktop\修士研究用\解析データ\{subject_num}"):
-            os.makedirs(fr"C:\Users\tyasu\Desktop\修士研究用\解析データ\{subject_num}")
-        if not os.path.exists(fr"C:\Users\tyasu\Desktop\修士研究用\解析データ\{subject_num}\DS_log"):
-            os.makedirs(fr"C:\Users\tyasu\Desktop\修士研究用\解析データ\{subject_num}\DS_log")
+        if not os.path.exists(os.path.join(self.path_to_data_dir,os.path.join(self.path_to_data_dir,fr"解析データ\{subject_num}"))):
+            os.makedirs(os.path.join(self.path_to_data_dir,os.path.join(self.path_to_data_dir,fr"解析データ\{subject_num}")))
+        if not os.path.exists(os.path.join(self.path_to_data_dir,os.path.join(self.path_to_data_dir,fr"解析データ\{subject_num}\DS_log"))):
+            os.makedirs(os.path.join(self.path_to_data_dir,os.path.join(self.path_to_data_dir,fr"解析データ\{subject_num}\DS_log")))
         self.acceleration=None
         self.difference=None
         self.relative_velocity=None
         self.DS_log_dfs:list=dfs
         self.experiment_nums=experiment_nums
+        self.self.path_to_data_dir=self.path_to_data_dir
             
             
     def calculate_acceleration(self):
@@ -56,9 +57,9 @@ class DS_log_analysis():
         plt.xlabel('time (s)')
         plt.ylabel('velocity(m/s)')
         if store:
-            if not os.path.exists(fr"C:\Users\tyasu\Desktop\修士研究用\解析データ\{self.subject_num}\DS_log\velocity"):
-                os.makedirs(fr"C:\Users\tyasu\Desktop\修士研究用\解析データ\{self.subject_num}\DS_log\velocity")
-            plt.savefig(fr"C:\Users\tyasu\Desktop\修士研究用\解析データ\{self.subject_num}\DS_log\velocity\velocity_{self.experiment_num}.png")
+            if not os.path.exists(os.path.join(self.path_to_data_dir,fr"解析データ\{self.subject_num}\DS_log\velocity")):
+                os.makedirs(os.path.join(self.path_to_data_dir,fr"解析データ\{self.subject_num}\DS_log\velocity"))
+            plt.savefig(os.path.join(self.path_to_data_dir,fr"解析データ\{self.subject_num}\DS_log\velocity\velocity_{self.experiment_num}.png"))
         if show:
             plt.show()
         else:
@@ -83,9 +84,9 @@ class DS_log_analysis():
             plt.suptitle(large_title)
         plt.tight_layout()
         if store:
-            if not os.path.exists(fr"C:\Users\tyasu\Desktop\修士研究用\解析データ\{self.subject_num}\DS_log\velocity"):
-                os.makedirs(fr"C:\Users\tyasu\Desktop\修士研究用\解析データ\{self.subject_num}\DS_log\velocity")
-            plt.savefig(fr"C:\Users\tyasu\Desktop\修士研究用\解析データ\{self.subject_num}\DS_log\velocity\multi_velocity_{filename}.png")
+            if not os.path.exists(os.path.join(self.path_to_data_dir,fr"解析データ\{self.subject_num}\DS_log\velocity")):
+                os.makedirs(os.path.join(self.path_to_data_dir,fr"解析データ\{self.subject_num}\DS_log\velocity"))
+            plt.savefig(os.path.join(self.path_to_data_dir,fr"解析データ\{self.subject_num}\DS_log\velocity\multi_velocity_{filename}.png"))
         if show:
             plt.show()
         else:
@@ -100,9 +101,9 @@ class DS_log_analysis():
         plt.xlabel('time (s)')
         plt.ylabel('distance(m)')
         if store:
-            if not os.path.exists(fr"C:\Users\tyasu\Desktop\修士研究用\解析データ\{self.subject_num}\DS_log\distance_of_vehicles"):
-                os.makedirs(fr"C:\Users\tyasu\Desktop\修士研究用\解析データ\{self.subject_num}\DS_log\distance_of_vehicles")
-            plt.savefig(fr"C:\Users\tyasu\Desktop\修士研究用\解析データ\{self.subject_num}\DS_log\distance_of_vehicles\distance_of_vehicles_{self.experiment_num}.png")
+            if not os.path.exists(os.path.join(self.path_to_data_dir,fr"解析データ\{self.subject_num}\DS_log\distance_of_vehicles")):
+                os.makedirs(os.path.join(self.path_to_data_dir,fr"解析データ\{self.subject_num}\DS_log\distance_of_vehicles"))
+            plt.savefig(os.path.join(self.path_to_data_dir,fr"解析データ\{self.subject_num}\DS_log\distance_of_vehicles\distance_of_vehicles_{self.experiment_num}.png"))
         if show:
             plt.show()
         else:
@@ -127,9 +128,9 @@ class DS_log_analysis():
             plt.suptitle(large_title)
         plt.tight_layout()
         if store:
-            if not os.path.exists(fr"C:\Users\tyasu\Desktop\修士研究用\解析データ\{self.subject_num}\DS_log\distance_of_vehicles"):
-                os.makedirs(fr"C:\Users\tyasu\Desktop\修士研究用\解析データ\{self.subject_num}\DS_log\distance_of_vehicles")
-            plt.savefig(fr"C:\Users\tyasu\Desktop\修士研究用\解析データ\{self.subject_num}\DS_log\distance_of_vehicles\multi_distance_of_vehicles_{filename}.png")
+            if not os.path.exists(os.path.join(self.path_to_data_dir,fr"解析データ\{self.subject_num}\DS_log\distance_of_vehicles")):
+                os.makedirs(os.path.join(self.path_to_data_dir,fr"解析データ\{self.subject_num}\DS_log\distance_of_vehicles"))
+            plt.savefig(os.path.join(self.path_to_data_dir,fr"解析データ\{self.subject_num}\DS_log\distance_of_vehicles\multi_distance_of_vehicles_{filename}.png"))
         if show:
             plt.show()
         else:
@@ -142,9 +143,9 @@ class DS_log_analysis():
         plt.xlabel('time (s)')
         plt.ylabel('velocity(m/s)')
         if store:
-            if not os.path.exists(fr"C:\Users\tyasu\Desktop\修士研究用\解析データ\{self.subject_num}\DS_log\relative_velocity"):
-                os.makedirs(fr"C:\Users\tyasu\Desktop\修士研究用\解析データ\{self.subject_num}\DS_log\relative_velocity")
-            plt.savefig(fr"C:\Users\tyasu\Desktop\修士研究用\解析データ\{self.subject_num}\DS_log\relative_velocity\relative_velocity_{self.experiment_num}.png")
+            if not os.path.exists(os.path.join(self.path_to_data_dir,fr"解析データ\{self.subject_num}\DS_log\relative_velocity")):
+                os.makedirs(os.path.join(self.path_to_data_dir,fr"解析データ\{self.subject_num}\DS_log\relative_velocity"))
+            plt.savefig(os.path.join(self.path_to_data_dir,fr"解析データ\{self.subject_num}\DS_log\relative_velocity\relative_velocity_{self.experiment_num}.png"))
         if show:
             plt.show()
         else:
@@ -169,9 +170,9 @@ class DS_log_analysis():
             plt.suptitle(large_title)
         plt.tight_layout()
         if store:
-            if not os.path.exists(fr"C:\Users\tyasu\Desktop\修士研究用\解析データ\{self.subject_num}\DS_log\relative_velocity"):
-                os.makedirs(fr"C:\Users\tyasu\Desktop\修士研究用\解析データ\{self.subject_num}\DS_log\relative_velocity")
-            plt.savefig(fr"C:\Users\tyasu\Desktop\修士研究用\解析データ\{self.subject_num}\DS_log\relative_velocity\multi_relative_velocity_{filename}.png")
+            if not os.path.exists(os.path.join(self.path_to_data_dir,fr"解析データ\{self.subject_num}\DS_log\relative_velocity")):
+                os.makedirs(os.path.join(self.path_to_data_dir,fr"解析データ\{self.subject_num}\DS_log\relative_velocity"))
+            plt.savefig(os.path.join(self.path_to_data_dir,fr"解析データ\{self.subject_num}\DS_log\relative_velocity\multi_relative_velocity_{filename}.png"))
         if show:
             plt.show()
         else:
@@ -186,9 +187,9 @@ class DS_log_analysis():
         plt.ylabel('pressure')
         plt.legend()  # 凡例を表示
         if store:
-            if not os.path.exists(fr"C:\Users\tyasu\Desktop\修士研究用\解析データ\{self.subject_num}\DS_log\accel_brake"):
-                os.makedirs(fr"C:\Users\tyasu\Desktop\修士研究用\解析データ\{self.subject_num}\DS_log\accel_brake")
-            plt.savefig(fr"C:\Users\tyasu\Desktop\修士研究用\解析データ\{self.subject_num}\DS_log\accel_brake\accel_brake_{self.experiment_num}.png")        
+            if not os.path.exists(os.path.join(self.path_to_data_dir,fr"解析データ\{self.subject_num}\DS_log\accel_brake")):
+                os.makedirs(os.path.join(self.path_to_data_dir,fr"解析データ\{self.subject_num}\DS_log\accel_brake"))
+            plt.savefig(os.path.join(self.path_to_data_dir,fr"解析データ\{self.subject_num}\DS_log\accel_brake\accel_brake_{self.experiment_num}.png"))
         if show:
             plt.show()
         else:
@@ -216,9 +217,9 @@ class DS_log_analysis():
             plt.suptitle(large_title)
         plt.tight_layout()
         if store:
-            if not os.path.exists(fr"C:\Users\tyasu\Desktop\修士研究用\解析データ\{self.subject_num}\DS_log\accel_brake"):
-                os.makedirs(fr"C:\Users\tyasu\Desktop\修士研究用\解析データ\{self.subject_num}\DS_log\accel_brake")
-            plt.savefig(fr"C:\Users\tyasu\Desktop\修士研究用\解析データ\{self.subject_num}\DS_log\accel_brake\multi_accel_brake_{filename}.png")      
+            if not os.path.exists(os.path.join(self.path_to_data_dir,fr"解析データ\{self.subject_num}\DS_log\accel_brake")):
+                os.makedirs(os.path.join(self.path_to_data_dir,fr"解析データ\{self.subject_num}\DS_log\accel_brake"))
+            plt.savefig(os.path.join(self.path_to_data_dir,fr"解析データ\{self.subject_num}\DS_log\accel_brake\multi_accel_brake_{filename}.png"))      
         if show:
             plt.show()
         else:
@@ -245,9 +246,9 @@ class DS_log_analysis():
         # fig.tight_layout()
         plt.title('Steering angle and torque')
         if store:
-            if not os.path.exists(fr"C:\Users\tyasu\Desktop\修士研究用\解析データ\{self.subject_num}\DS_log\steering"):
-                os.makedirs(fr"C:\Users\tyasu\Desktop\修士研究用\解析データ\{self.subject_num}\DS_log\steering")
-            plt.savefig(fr"C:\Users\tyasu\Desktop\修士研究用\解析データ\{self.subject_num}\DS_log\steering\steering_{self.experiment_num}.png")  
+            if not os.path.exists(os.path.join(self.path_to_data_dir,fr"解析データ\{self.subject_num}\DS_log\steering")):
+                os.makedirs(os.path.join(self.path_to_data_dir,fr"解析データ\{self.subject_num}\DS_log\steering"))
+            plt.savefig(os.path.join(self.path_to_data_dir,fr"解析データ\{self.subject_num}\DS_log\steering\steering_{self.experiment_num}.png"))  
         if show:
             plt.show()
         else:
@@ -283,9 +284,9 @@ class DS_log_analysis():
             plt.suptitle(large_title)
         plt.tight_layout()
         if store:
-            if not os.path.exists(fr"C:\Users\tyasu\Desktop\修士研究用\解析データ\{self.subject_num}\DS_log\steering"):
-                os.makedirs(fr"C:\Users\tyasu\Desktop\修士研究用\解析データ\{self.subject_num}\DS_log\steering")
-            plt.savefig(fr"C:\Users\tyasu\Desktop\修士研究用\解析データ\{self.subject_num}\DS_log\steering\multi_steering_{filename}.png")    
+            if not os.path.exists(os.path.join(self.path_to_data_dir,fr"解析データ\{self.subject_num}\DS_log\steering")):
+                os.makedirs(os.path.join(self.path_to_data_dir,fr"解析データ\{self.subject_num}\DS_log\steering"))
+            plt.savefig(os.path.join(self.path_to_data_dir,fr"解析データ\{self.subject_num}\DS_log\steering\multi_steering_{filename}.png"))   
         if show:
             plt.show()
         else:
@@ -324,9 +325,9 @@ class DS_log_analysis():
         
         
 if __name__=="__main__":
-    data=pd.read_csv(r"C:\Users\tyasu\Desktop\修士研究用\実験データ\1\ds_log\ds1.csv", header=6,encoding="shift-jis").values[:,12]
+    data=pd.read_csv(r"実験データ\1\ds_log\ds1.csv", header=6,encoding="shift-jis").values[:,12]
     filtered_data=DS_log_analysis(1,1).low_pass_filter(data,3,order=10)
-    t = pd.read_csv(r"C:\Users\tyasu\Desktop\修士研究用\実験データ\1\ds_log\ds1.csv", header=6,encoding="shift-jis").values[:,11]
+    t = pd.read_csv(r"実験データ\1\ds_log\ds1.csv", header=6,encoding="shift-jis").values[:,11]
     # プロット
     plt.figure(figsize=(10, 6))
     plt.plot(t, data, 'b-', label='Original Data')

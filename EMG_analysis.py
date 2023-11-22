@@ -6,7 +6,7 @@ import os
 
 sampling_rate = 2000
 
-def emg_analysis(emg_df:pd.DataFrame,experiment_num:int,subject_num:int,show:bool=True,store:bool=True):
+def emg_analysis(emg_df:pd.DataFrame,experiment_num:int,subject_num:int,show:bool=True,store:bool=True,path_to_data_dir=r"C:\Users\tyasu\Desktop\修士研究用"):
     emg_np = emg_df.values
     emg_data = emg_np[:, 5].astype(np.float32)
 
@@ -37,11 +37,11 @@ def emg_analysis(emg_df:pd.DataFrame,experiment_num:int,subject_num:int,show:boo
         fig = plt.gcf()
         fig.set_size_inches(16, 12, forward=True)
         if store:
-            if not os.path.exists(fr"C:\Users\tyasu\Desktop\修士研究用\解析データ\{subject_num}"):
-                os.makedirs(fr"C:\Users\tyasu\Desktop\修士研究用\解析データ\{subject_num}")
-            if not os.path.exists(fr"C:\Users\tyasu\Desktop\修士研究用\解析データ\{subject_num}\EMG"):
-                os.makedirs(fr"C:\Users\tyasu\Desktop\修士研究用\解析データ\{subject_num}\EMG")
-            plt.savefig(fr"C:\Users\tyasu\Desktop\修士研究用\解析データ\{subject_num}\EMG\EMG_{experiment_num}.png")
+            if not os.path.exists(os.path.join(path_to_data_dir,fr"解析データ\{subject_num}")):
+                os.makedirs(os.path.join(path_to_data_dir,fr"解析データ\{subject_num}"))
+            if not os.path.exists(os.path.join(path_to_data_dir,fr"解析データ\{subject_num}\EMG")):
+                os.makedirs(os.path.join(path_to_data_dir,fr"解析データ\{subject_num}\EMG"))
+            plt.savefig(os.path.join(path_to_data_dir,fr"解析データ\{subject_num}\EMG\EMG_{experiment_num}.png"))
         if show:
             plt.show()
         else:
@@ -56,6 +56,6 @@ def emg_analysis(emg_df:pd.DataFrame,experiment_num:int,subject_num:int,show:boo
         
         
 if __name__=="__main__":
-    path = r"C:\Users\tyasu\Desktop\修士研究用\実験データ\1\polymate\実験1.CSV"
+    path = r"実験データ\1\polymate\実験1.CSV"
     emg_df = pd.read_csv(path, header=3)
     emg_analysis(emg_df,1,1)

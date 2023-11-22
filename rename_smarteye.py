@@ -29,6 +29,6 @@ def load_excel(excel_path):
 if __name__=="__main__":
     subject_num=12
     dir_path=fr"D:\修士研究\実験データ\{subject_num}\smarteye"
-    experiment_num_path=r"C:\Users\tyasu\Desktop\修士研究用\ラテン方格法.xlsm"
+    experiment_num_path=r"ラテン方格法.xlsm"
     experiment_num_list=load_excel(experiment_num_path)[subject_num-1,:].astype(int)
     rename_smarteye(dir_path,experiment_num_list)
