@@ -14,10 +14,11 @@ class DS_log_analysis():
             self.DS_log_np=self.DS_log_df.values
             self.times_np=self.DS_log_np[:,11]-self.DS_log_np[0,11]
             self.velocity_array=self.DS_log_np[:,34]
-        if not os.path.exists(os.path.join(path_to_data_dir,fr"解析データ\{subject_num}")):
-            os.makedirs(os.path.join(path_to_data_dir,fr"解析データ\{subject_num}"))
-        if not os.path.exists(os.path.join(path_to_data_dir,fr"解析データ\{subject_num}\DS_log")):
-            os.makedirs(os.path.join(path_to_data_dir,fr"解析データ\{subject_num}\DS_log"))
+        self.analysis_path=os.path.join("解析データ",str(subject_num),"DS_log")
+        if not os.path.exists(os.path.join(path_to_data_dir,"解析データ",str(subject_num))):
+            os.makedirs(os.path.join(path_to_data_dir,"解析データ",str(subject_num)))
+        if not os.path.exists(os.path.join(path_to_data_dir,self.analysis_path)):
+            os.makedirs(os.path.join(path_to_data_dir,self.analysis_path))
         self.acceleration=None
         self.min_difference=None
         self.relative_velocity=None
@@ -84,9 +85,9 @@ class DS_log_analysis():
         plt.ylabel('acceleration(m/s^2)')
 
         if store:
-            if not os.path.exists(os.path.join(self.path_to_data_dir,fr"解析データ\{self.subject_num}\DS_log\acceleration")):
-                os.makedirs(os.path.join(self.path_to_data_dir,fr"解析データ\{self.subject_num}\DS_log\acceleration"))
-            plt.savefig(os.path.join(self.path_to_data_dir,fr"解析データ\{self.subject_num}\DS_log\acceleration\acceleration_{self.experiment_num}.png"))
+            if not os.path.exists(os.path.join(self.path_to_data_dir,self.analysis_path,"acceleration")):
+                os.makedirs(os.path.join(self.path_to_data_dir,self.analysis_path,"acceleration"))
+            plt.savefig(os.path.join(self.path_to_data_dir,self.analysis_path,"acceleration",f"acceleration_{self.experiment_num}.png"))
         if show:
             plt.show()
         else:
@@ -114,9 +115,9 @@ class DS_log_analysis():
         plt.tight_layout()
 
         if store:
-            if not os.path.exists(os.path.join(self.path_to_data_dir,fr"解析データ\{self.subject_num}\DS_log\acceleration")):
-                os.makedirs(os.path.join(self.path_to_data_dir,fr"解析データ\{self.subject_num}\DS_log\acceleration"))
-            plt.savefig(os.path.join(self.path_to_data_dir,fr"解析データ\{self.subject_num}\DS_log\acceleration\multi_acceleration_{filename}.png"))
+            if not os.path.exists(os.path.join(self.path_to_data_dir,self.analysis_path,"acceleration")):
+                os.makedirs(os.path.join(self.path_to_data_dir,self.analysis_path,"acceleration"))
+            plt.savefig(os.path.join(self.path_to_data_dir,self.analysis_path,"acceleration",f"multi_acceleration_{filename}.png"))
         if show:
             plt.show()
         else:
@@ -139,9 +140,9 @@ class DS_log_analysis():
         plt.ylabel('velocity(m/s)')
 
         if store:
-            if not os.path.exists(os.path.join(self.path_to_data_dir,fr"解析データ\{self.subject_num}\DS_log\velocity")):
-                os.makedirs(os.path.join(self.path_to_data_dir,fr"解析データ\{self.subject_num}\DS_log\velocity"))
-            plt.savefig(os.path.join(self.path_to_data_dir,fr"解析データ\{self.subject_num}\DS_log\velocity\velocity_{self.experiment_num}.png"))
+            if not os.path.exists(os.path.join(self.path_to_data_dir,self.analysis_path,"velocity")):
+                os.makedirs(os.path.join(self.path_to_data_dir,self.analysis_path,"velocity"))
+            plt.savefig(os.path.join(self.path_to_data_dir,self.analysis_path,"velocity",f"velocity_{self.experiment_num}.png"))
         if show:
             plt.show()
         else:
@@ -168,9 +169,9 @@ class DS_log_analysis():
         plt.tight_layout()
 
         if store:
-            if not os.path.exists(os.path.join(self.path_to_data_dir,fr"解析データ\{self.subject_num}\DS_log\velocity")):
-                os.makedirs(os.path.join(self.path_to_data_dir,fr"解析データ\{self.subject_num}\DS_log\velocity"))
-            plt.savefig(os.path.join(self.path_to_data_dir,fr"解析データ\{self.subject_num}\DS_log\velocity\multi_velocity_{filename}.png"))
+            if not os.path.exists(os.path.join(self.path_to_data_dir,self.analysis_path,"velocity")):
+                os.makedirs(os.path.join(self.path_to_data_dir,self.analysis_path,"velocity"))
+            plt.savefig(os.path.join(self.path_to_data_dir,self.analysis_path,"velocity",f"multi_velocity_{filename}.png"))
         if show:
             plt.show()
         else:
@@ -186,9 +187,9 @@ class DS_log_analysis():
         plt.ylabel('distance(m)')
 
         if store:
-            if not os.path.exists(os.path.join(self.path_to_data_dir,fr"解析データ\{self.subject_num}\DS_log\distance_of_vehicles")):
-                os.makedirs(os.path.join(self.path_to_data_dir,fr"解析データ\{self.subject_num}\DS_log\distance_of_vehicles"))
-            plt.savefig(os.path.join(self.path_to_data_dir,fr"解析データ\{self.subject_num}\DS_log\distance_of_vehicles\distance_of_vehicles_{self.experiment_num}.png"))
+            if not os.path.exists(os.path.join(self.path_to_data_dir,self.analysis_path,"distance_of_vehicles")):
+                os.makedirs(os.path.join(self.path_to_data_dir,self.analysis_path,"distance_of_vehicles"))
+            plt.savefig(os.path.join(self.path_to_data_dir,self.analysis_path,"distance_of_vehicles",f"distance_of_vehicles_{self.experiment_num}.png"))
         if show:
             plt.show()
         else:
@@ -216,9 +217,9 @@ class DS_log_analysis():
         plt.tight_layout()
 
         if store:
-            if not os.path.exists(os.path.join(self.path_to_data_dir,fr"解析データ\{self.subject_num}\DS_log\distance_of_vehicles")):
-                os.makedirs(os.path.join(self.path_to_data_dir,fr"解析データ\{self.subject_num}\DS_log\distance_of_vehicles"))
-            plt.savefig(os.path.join(self.path_to_data_dir,fr"解析データ\{self.subject_num}\DS_log\distance_of_vehicles\multi_distance_of_vehicles_{filename}.png"))
+            if not os.path.exists(os.path.join(self.path_to_data_dir,self.analysis_path,"distance_of_vehicles")):
+                os.makedirs(os.path.join(self.path_to_data_dir,self.analysis_path,"distance_of_vehicles"))
+            plt.savefig(os.path.join(self.path_to_data_dir,self.analysis_path,"distance_of_vehicles",f"multi_distance_of_vehicles_{filename}.png"))
         if show:
             plt.show()
         else:
@@ -232,9 +233,9 @@ class DS_log_analysis():
         plt.ylabel('velocity(m/s)')
 
         if store:
-            if not os.path.exists(os.path.join(self.path_to_data_dir,fr"解析データ\{self.subject_num}\DS_log\relative_velocity")):
-                os.makedirs(os.path.join(self.path_to_data_dir,fr"解析データ\{self.subject_num}\DS_log\relative_velocity"))
-            plt.savefig(os.path.join(self.path_to_data_dir,fr"解析データ\{self.subject_num}\DS_log\relative_velocity\relative_velocity_{self.experiment_num}.png"))
+            if not os.path.exists(os.path.join(self.path_to_data_dir,self.analysis_path,"relative_velocity")):
+                os.makedirs(os.path.join(self.path_to_data_dir,self.analysis_path,"relative_velocity"))
+            plt.savefig(os.path.join(self.path_to_data_dir,self.analysis_path,"relative_velocity",f"relative_velocity_{self.experiment_num}.png"))
         if show:
             plt.show()
         else:
@@ -262,9 +263,9 @@ class DS_log_analysis():
         plt.tight_layout()
 
         if store:
-            if not os.path.exists(os.path.join(self.path_to_data_dir,fr"解析データ\{self.subject_num}\DS_log\relative_velocity")):
-                os.makedirs(os.path.join(self.path_to_data_dir,fr"解析データ\{self.subject_num}\DS_log\relative_velocity"))
-            plt.savefig(os.path.join(self.path_to_data_dir,fr"解析データ\{self.subject_num}\DS_log\relative_velocity\multi_relative_velocity_{filename}.png"))
+            if not os.path.exists(os.path.join(self.path_to_data_dir,self.analysis_path,"relative_velocity")):
+                os.makedirs(os.path.join(self.path_to_data_dir,self.analysis_path,"relative_velocity"))
+            plt.savefig(os.path.join(self.path_to_data_dir,self.analysis_path,"relative_velocity",f"multi_relative_velocity_{filename}.png"))
         if show:
             plt.show()
         else:
@@ -280,9 +281,9 @@ class DS_log_analysis():
         plt.legend()  # 凡例を表示
 
         if store:
-            if not os.path.exists(os.path.join(self.path_to_data_dir,fr"解析データ\{self.subject_num}\DS_log\accel_brake")):
-                os.makedirs(os.path.join(self.path_to_data_dir,fr"解析データ\{self.subject_num}\DS_log\accel_brake"))
-            plt.savefig(os.path.join(self.path_to_data_dir,fr"解析データ\{self.subject_num}\DS_log\accel_brake\accel_brake_{self.experiment_num}.png"))
+            if not os.path.exists(os.path.join(self.path_to_data_dir,self.analysis_path,"accel_brake")):
+                os.makedirs(os.path.join(self.path_to_data_dir,self.analysis_path,"accel_brake"))
+            plt.savefig(os.path.join(self.path_to_data_dir,self.analysis_path,"accel_brake",f"accel_brake_{self.experiment_num}.png"))
         if show:
             plt.show()
         else:
@@ -312,9 +313,9 @@ class DS_log_analysis():
         plt.tight_layout()
 
         if store:
-            if not os.path.exists(os.path.join(self.path_to_data_dir,fr"解析データ\{self.subject_num}\DS_log\accel_brake")):
-                os.makedirs(os.path.join(self.path_to_data_dir,fr"解析データ\{self.subject_num}\DS_log\accel_brake"))
-            plt.savefig(os.path.join(self.path_to_data_dir,fr"解析データ\{self.subject_num}\DS_log\accel_brake\multi_accel_brake_{filename}.png"))      
+            if not os.path.exists(os.path.join(self.path_to_data_dir,self.analysis_path,"accel_brake")):
+                os.makedirs(os.path.join(self.path_to_data_dir,self.analysis_path,"accel_brake"))
+            plt.savefig(os.path.join(self.path_to_data_dir,self.analysis_path,"accel_brake",f"multi_accel_brake_{filename}.png"))      
         if show:
             plt.show()
         else:
@@ -330,9 +331,9 @@ class DS_log_analysis():
         plt.ylabel('angle(deg)')
 
         if store:
-            if not os.path.exists(os.path.join(self.path_to_data_dir,fr"解析データ\{self.subject_num}\DS_log\steering_angle")):
-                os.makedirs(os.path.join(self.path_to_data_dir,fr"解析データ\{self.subject_num}\DS_log\steering_angle"))
-            plt.savefig(os.path.join(self.path_to_data_dir,fr"解析データ\{self.subject_num}\DS_log\steering_angle\steering_angle_{self.experiment_num}.png"))
+            if not os.path.exists(os.path.join(self.path_to_data_dir,self.analysis_path,"steering_angle")):
+                os.makedirs(os.path.join(self.path_to_data_dir,self.analysis_path,"steering_angle"))
+            plt.savefig(os.path.join(self.path_to_data_dir,self.analysis_path,"steering_angle",f"steering_angle_{self.experiment_num}.png"))
         if show:
             plt.show()
         else:
@@ -360,9 +361,9 @@ class DS_log_analysis():
         plt.tight_layout()
 
         if store:
-            if not os.path.exists(os.path.join(self.path_to_data_dir,fr"解析データ\{self.subject_num}\DS_log\steering_angle")):
-                os.makedirs(os.path.join(self.path_to_data_dir,fr"解析データ\{self.subject_num}\DS_log\steering_angle"))
-            plt.savefig(os.path.join(self.path_to_data_dir,fr"解析データ\{self.subject_num}\DS_log\steering_angle\multi_steering_angle_{filename}.png"))      
+            if not os.path.exists(os.path.join(self.path_to_data_dir,self.analysis_path,"steering_angle")):
+                os.makedirs(os.path.join(self.path_to_data_dir,self.analysis_path,"steering_angle"))
+            plt.savefig(os.path.join(self.path_to_data_dir,self.analysis_path,"steering_angle",f"multi_steering_angle_{filename}.png"))      
         if show:
             plt.show()
         else:
@@ -389,9 +390,9 @@ class DS_log_analysis():
         plt.title('Steering angle and torque')
 
         if store:
-            if not os.path.exists(os.path.join(self.path_to_data_dir,fr"解析データ\{self.subject_num}\DS_log\steering")):
-                os.makedirs(os.path.join(self.path_to_data_dir,fr"解析データ\{self.subject_num}\DS_log\steering"))
-            plt.savefig(os.path.join(self.path_to_data_dir,fr"解析データ\{self.subject_num}\DS_log\steering\steering_{self.experiment_num}.png"))  
+            if not os.path.exists(os.path.join(self.path_to_data_dir,self.analysis_path,"steering")):
+                os.makedirs(os.path.join(self.path_to_data_dir,self.analysis_path,"steering"))
+            plt.savefig(os.path.join(self.path_to_data_dir,self.analysis_path,"steering",f"steering_{self.experiment_num}.png"))  
         if show:
             plt.show()
         else:
@@ -429,9 +430,9 @@ class DS_log_analysis():
         plt.tight_layout()
 
         if store:
-            if not os.path.exists(os.path.join(self.path_to_data_dir,fr"解析データ\{self.subject_num}\DS_log\steering")):
-                os.makedirs(os.path.join(self.path_to_data_dir,fr"解析データ\{self.subject_num}\DS_log\steering"))
-            plt.savefig(os.path.join(self.path_to_data_dir,fr"解析データ\{self.subject_num}\DS_log\steering\multi_steering_{filename}.png"))   
+            if not os.path.exists(os.path.join(self.path_to_data_dir,self.analysis_path,"steering")):
+                os.makedirs(os.path.join(self.path_to_data_dir,self.analysis_path,"steering"))
+            plt.savefig(os.path.join(self.path_to_data_dir,self.analysis_path,"steering",f"multi_steering_{filename}.png"))   
         if show:
             plt.show()
         else:

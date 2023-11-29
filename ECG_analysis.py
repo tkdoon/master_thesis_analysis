@@ -23,6 +23,11 @@ class ECG_analysis():
         self.filtered_data=None
         self.ts=None
         self.sdnn=None
+        self.analysis_path=os.path.join(path_to_data_dir,"解析データ",str(subject_num),"ECG")
+        if not os.path.exists(os.path.join(path_to_data_dir,"解析データ",str(subject_num))):
+            os.makedirs(os.path.join(path_to_data_dir,"解析データ",str(subject_num)))
+        if not os.path.exists(os.path.join(path_to_data_dir,self.analysis_path)):
+            os.makedirs(os.path.join(path_to_data_dir,self.analysis_path))
     
     def calculate(self,ecg_np:np.array,modify:bool=True)->dict:
         def find_peaks():
@@ -134,13 +139,9 @@ class ECG_analysis():
         plt.legend()
 
         if store:
-            if not os.path.exists(os.path.join(self.path_to_data_dir,fr"解析データ\{self.subject_num}")):
-                os.makedirs(os.path.join(self.path_to_data_dir,fr"解析データ\{self.subject_num}"))
-            if not os.path.exists(os.path.join(self.path_to_data_dir,fr"解析データ\{self.subject_num}\ECG")):
-                os.makedirs(os.path.join(self.path_to_data_dir,fr"解析データ\{self.subject_num}\ECG"))
-            if not os.path.exists(os.path.join(self.path_to_data_dir,fr"解析データ\{self.subject_num}\ECG\RRI")):
-                os.makedirs(os.path.join(self.path_to_data_dir,fr"解析データ\{self.subject_num}\ECG\RRI"))
-            plt.savefig(os.path.join(self.path_to_data_dir,fr"解析データ\{self.subject_num}\ECG\RRI\RRI_{self.experiment_num}.png"))
+            if not os.path.exists(os.path.join(self.path_to_data_dir,self.analysis_path,"RRI")):
+                os.makedirs(os.path.join(self.path_to_data_dir,self.analysis_path,"RRI"))
+            plt.savefig(os.path.join(self.path_to_data_dir,self.analysis_path,"RRI","RRI_{self.experiment_num}.png"))
         if show:
             plt.show()
         else:
@@ -158,13 +159,10 @@ class ECG_analysis():
         plt.ylim(0, 50000)
 
         if store:
-            if not os.path.exists(os.path.join(self.path_to_data_dir,fr"解析データ\{self.subject_num}")):
-                os.makedirs(os.path.join(self.path_to_data_dir,fr"解析データ\{self.subject_num}"))
-            if not os.path.exists(os.path.join(self.path_to_data_dir,fr"解析データ\{self.subject_num}\ECG")):
-                os.makedirs(os.path.join(self.path_to_data_dir,fr"解析データ\{self.subject_num}\ECG"))
-            if not os.path.exists(os.path.join(self.path_to_data_dir,fr"解析データ\{self.subject_num}\ECG\FFT_spectrum")):
-                os.makedirs(os.path.join(self.path_to_data_dir,fr"解析データ\{self.subject_num}\ECG\FFT_spectrum"))
-            plt.savefig(os.path.join(self.path_to_data_dir,fr"解析データ\{self.subject_num}\ECG\FFT_spectrum\FFT_{self.experiment_num}.png"))
+
+            if not os.path.exists(os.path.join(self.path_to_data_dir,self.analysis_path,"FFT_spectrum")):
+                os.makedirs(os.path.join(self.path_to_data_dir,self.analysis_path,"FFT_spectrum"))
+            plt.savefig(os.path.join(self.path_to_data_dir,self.analysis_path,"FFT_spectrum","FFT_{self.experiment_num}.png"))
         if show:
             plt.show()
         else:
@@ -191,13 +189,10 @@ class ECG_analysis():
         plt.legend()
 
         if store:
-            if not os.path.exists(os.path.join(self.path_to_data_dir,fr"解析データ\{self.subject_num}")):
-                os.makedirs(os.path.join(self.path_to_data_dir,fr"解析データ\{self.subject_num}"))
-            if not os.path.exists(os.path.join(self.path_to_data_dir,fr"解析データ\{self.subject_num}\ECG")):
-                os.makedirs(os.path.join(self.path_to_data_dir,fr"解析データ\{self.subject_num}\ECG"))
-            if not os.path.exists(os.path.join(self.path_to_data_dir,fr"解析データ\{self.subject_num}\ECG\heart_rate_rri")):
-                os.makedirs(os.path.join(self.path_to_data_dir,fr"解析データ\{self.subject_num}\ECG\heart_rate_rri"))
-            plt.savefig(os.path.join(self.path_to_data_dir,fr"解析データ\{self.subject_num}\ECG\heart_rate_rri\heartrate_rri_{self.experiment_num}.png"))
+
+            if not os.path.exists(os.path.join(self.path_to_data_dir,self.analysis_path,"heart_rate_rri")):
+                os.makedirs(os.path.join(self.path_to_data_dir,self.analysis_path,"heart_rate_rri"))
+            plt.savefig(os.path.join(self.path_to_data_dir,self.analysis_path,"heart_rate_rri","heartrate_rri_{self.experiment_num}.png"))
         if show:
             plt.show()
         else:
@@ -247,14 +242,8 @@ class ECG_analysis():
         plt.tight_layout()
 
         if store:
-            if not os.path.exists(os.path.join(self.path_to_data_dir,fr"解析データ\{self.subject_num}")):
-                os.makedirs(os.path.join(self.path_to_data_dir,fr"解析データ\{self.subject_num}"))
-            if not os.path.exists(os.path.join(self.path_to_data_dir,fr"解析データ\{self.subject_num}\ECG")):
-                os.makedirs(os.path.join(self.path_to_data_dir,fr"解析データ\{self.subject_num}\ECG"))
-            if not os.path.exists(os.path.join(self.path_to_data_dir,fr"解析データ\{self.subject_num}\ECG\RRI")):
-                os.makedirs(os.path.join(self.path_to_data_dir,fr"解析データ\{self.subject_num}\ECG\RRI"))
 
-            plt.savefig(os.path.join(self.path_to_data_dir,fr"解析データ\{self.subject_num}\ECG\RRI\multi_RRI_{filename}.png"))
+            plt.savefig(os.path.join(self.path_to_data_dir,self.analysis_path,"RRI","multi_RRI_{filename}.png"))
         if show:
             plt.show()
         else:
@@ -283,16 +272,7 @@ class ECG_analysis():
         plt.tight_layout()
 
         if store:
-            if not os.path.exists(os.path.join(self.path_to_data_dir,fr"解析データ\{self.subject_num}")):
-                os.makedirs(os.path.join(self.path_to_data_dir,fr"解析データ\{self.subject_num}"))
-            if not os.path.exists(os.path.join(self.path_to_data_dir,fr"解析データ\{self.subject_num}\ECG")):
-                os.makedirs(os.path.join(self.path_to_data_dir,fr"解析データ\{self.subject_num}\ECG"))
-            if not os.path.exists(os.path.join(self.path_to_data_dir,fr"解析データ\{self.subject_num}\ECG\FFT_spectrum")):
-                os.makedirs(os.path.join(self.path_to_data_dir,fr"解析データ\{self.subject_num}\ECG\FFT_spectrum"))
-            plt.savefig(os.path.join(self.path_to_data_dir,fr"解析データ\{self.subject_num}\ECG\FFT_spectrum\multi_FFT_{filename}.png"))
-        if show:
-            plt.show()
-        else:
+
             plt.close()
             
             
@@ -330,13 +310,10 @@ class ECG_analysis():
 
 
         if store:
-            if not os.path.exists(os.path.join(self.path_to_data_dir,fr"解析データ\{self.subject_num}")):
-                os.makedirs(os.path.join(self.path_to_data_dir,fr"解析データ\{self.subject_num}"))
-            if not os.path.exists(os.path.join(self.path_to_data_dir,fr"解析データ\{self.subject_num}\ECG")):
-                os.makedirs(os.path.join(self.path_to_data_dir,fr"解析データ\{self.subject_num}\ECG"))
-            if not os.path.exists(os.path.join(self.path_to_data_dir,fr"解析データ\{self.subject_num}\ECG\mean_heart_rate")):
-                os.makedirs(os.path.join(self.path_to_data_dir,fr"解析データ\{self.subject_num}\ECG\mean_heart_rate"))
-            plt.savefig(os.path.join(self.path_to_data_dir,fr"解析データ\{self.subject_num}\ECG\mean_heart_rate\heart_rate_{filename}.png"))
+
+            if not os.path.exists(os.path.join(self.path_to_data_dir,self.analysis_path,"mean_heart_rate")):
+                os.makedirs(os.path.join(self.path_to_data_dir,self.analysis_path,"mean_heart_rate"))
+            plt.savefig(os.path.join(self.path_to_data_dir,self.analysis_path,"mean_heart_rate","heart_rate_{filename}.png"))
         if show:
             plt.show()
         else:

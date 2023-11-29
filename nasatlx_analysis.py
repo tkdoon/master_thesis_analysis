@@ -9,7 +9,7 @@ class Nasatlx_analysis():
         self.subject_num=subject_num
         self.nasatlx_data=None
         self.path_to_data_dir=path_to_data_dir
-        self.json_file_path=os.path.join(path_to_data_dir,rf"実験データ\{subject_num}\{subject_num}.json")
+        self.json_file_path=os.path.join(path_to_data_dir,"実験データ",str(subject_num),f"{subject_num}.json")
         
     
     def open_file(self):
@@ -65,11 +65,11 @@ class Nasatlx_analysis():
 
 
         if store:
-            if not os.path.exists(os.path.join(self.path_to_data_dir,fr"解析データ\{self.subject_num}")):
-                os.makedirs(os.path.join(self.path_to_data_dir,fr"解析データ\{self.subject_num}"))
-            if not os.path.exists(os.path.join(self.path_to_data_dir,fr"解析データ\{self.subject_num}\nasatlx")):
-                os.makedirs(os.path.join(self.path_to_data_dir,fr"解析データ\{self.subject_num}\nasatlx"))
-            plt.savefig(os.path.join(self.path_to_data_dir,fr"解析データ\{self.subject_num}\nasatlx\frustration_workload_{filename}.png"))
+            if not os.path.exists(os.path.join(self.path_to_data_dir,"解析データ",str(self.subject_num))):
+                os.makedirs(os.path.join(self.path_to_data_dir,"解析データ",str(self.subject_num)))
+            if not os.path.exists(os.path.join(self.path_to_data_dir,"解析データ",str(self.subject_num),"nasatlx")):
+                os.makedirs(os.path.join(self.path_to_data_dir,"解析データ",str(self.subject_num),"nasatlx"))
+            plt.savefig(os.path.join(self.path_to_data_dir,"解析データ",str(self.subject_num),"nasatlx",f"frustration_workload_{filename}.png"))
         if show:
             plt.show()
         else:

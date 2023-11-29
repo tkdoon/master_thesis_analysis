@@ -23,6 +23,7 @@ class Smarteye_analysis():
         self.min_size=None
         self.prc=None
         self.mean_distance=None
+        self.analysis_path=os.path.join(path_to_data_dir,"解析データ",str(subject_num),"smarteye")
         
     def delete_zero_data(self,np_data:np.array)->np.array:
         # 直前の値に置き換える
@@ -97,9 +98,9 @@ class Smarteye_analysis():
         plt.ylabel('pupil diameter(mm)')
 
         if store:
-            if not os.path.exists(os.path.join(self.path_to_data_dir,fr"解析データ\{self.subject_num}\smarteye\pupil_size")):
-                os.makedirs(os.path.join(self.path_to_data_dir,fr"解析データ\{self.subject_num}\smarteye\pupil_size"))
-            plt.savefig(os.path.join(self.path_to_data_dir,fr"解析データ\{self.subject_num}\smarteye\pupil_size\pupil_size_{self.experiment_num}.png"))
+            if not os.path.exists(os.path.join(self.path_to_data_dir,self.analysis_path,"pupil_size")):
+                os.makedirs(os.path.join(self.path_to_data_dir,self.analysis_path,"pupil_size"))
+            plt.savefig(os.path.join(self.path_to_data_dir,self.analysis_path,"pupil_size","pupil_size_{self.experiment_num}.png"))
         if show:
             plt.show()
         else:
@@ -121,9 +122,9 @@ class Smarteye_analysis():
         plt.ylabel('eyelid distance(mm)')
 
         if store:
-            if not os.path.exists(os.path.join(self.path_to_data_dir,fr"解析データ\{self.subject_num}\smarteye\eyelid")):
-                os.makedirs(os.path.join(self.path_to_data_dir,fr"解析データ\{self.subject_num}\smarteye\eyelid"))
-            plt.savefig(os.path.join(self.path_to_data_dir,fr"解析データ\{self.subject_num}\smarteye\eyelid\eyelid_{self.experiment_num}.png"))
+            if not os.path.exists(os.path.join(self.path_to_data_dir,self.analysis_path,"eyelid")):
+                os.makedirs(os.path.join(self.path_to_data_dir,self.analysis_path,"eyelid"))
+            plt.savefig(os.path.join(self.path_to_data_dir,self.analysis_path,"eyelid","eyelid_{self.experiment_num}.png"))
         if show:
             plt.show()
         else:
@@ -142,9 +143,9 @@ class Smarteye_analysis():
         plt.legend()
 
         if store:
-            if not os.path.exists(os.path.join(self.path_to_data_dir,fr"解析データ\{self.subject_num}\smarteye\gaze_direction")):
-                os.makedirs(os.path.join(self.path_to_data_dir,fr"解析データ\{self.subject_num}\smarteye\gaze_direction"))
-            plt.savefig(os.path.join(self.path_to_data_dir,fr"解析データ\{self.subject_num}\smarteye\gaze_direction\gaze_direction_{self.experiment_num}.png"))
+            if not os.path.exists(os.path.join(self.path_to_data_dir,self.analysis_path,"gaze_direction")):
+                os.makedirs(os.path.join(self.path_to_data_dir,self.analysis_path,"gaze_direction"))
+            plt.savefig(os.path.join(self.path_to_data_dir,self.analysis_path,"gaze_direction","gaze_direction_{self.experiment_num}.png"))
         if show:
             plt.show()
         else:
@@ -245,9 +246,9 @@ class Smarteye_analysis():
         plt.tight_layout()
 
         if store:
-            if not os.path.exists(os.path.join(self.path_to_data_dir,fr"解析データ\{self.subject_num}\smarteye\gaze_direction")):
-                os.makedirs(os.path.join(self.path_to_data_dir,fr"解析データ\{self.subject_num}\smarteye\gaze_direction"))
-            plt.savefig(os.path.join(self.path_to_data_dir,fr"解析データ\{self.subject_num}\smarteye\gaze_direction\multi_gaze_direction_{filename}.png"))
+            if not os.path.exists(os.path.join(self.path_to_data_dir,self.analysis_path,"gaze_direction")):
+                os.makedirs(os.path.join(self.path_to_data_dir,self.analysis_path,"gaze_direction"))
+            plt.savefig(os.path.join(self.path_to_data_dir,self.analysis_path,"gaze_direction","multi_gaze_direction_{filename}.png"))
         if show:
             plt.show()
         else:

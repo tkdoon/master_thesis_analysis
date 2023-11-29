@@ -38,11 +38,11 @@ def emg_analysis(emg_df:pd.DataFrame,experiment_num:int,subject_num:int,show:boo
         fig.set_size_inches(16, 12, forward=True)
 
         if store:
-            if not os.path.exists(os.path.join(path_to_data_dir,fr"解析データ\{subject_num}")):
-                os.makedirs(os.path.join(path_to_data_dir,fr"解析データ\{subject_num}"))
-            if not os.path.exists(os.path.join(path_to_data_dir,fr"解析データ\{subject_num}\EMG")):
-                os.makedirs(os.path.join(path_to_data_dir,fr"解析データ\{subject_num}\EMG"))
-            plt.savefig(os.path.join(path_to_data_dir,fr"解析データ\{subject_num}\EMG\EMG_{experiment_num}.png"))
+            if not os.path.exists(os.path.join(path_to_data_dir,"解析データ",str(subject_num))):
+                os.makedirs(os.path.join(path_to_data_dir,"解析データ",str(subject_num)))
+            if not os.path.exists(os.path.join(path_to_data_dir,"解析データ",str(subject_num),"EMG")):
+                os.makedirs(os.path.join(path_to_data_dir,"解析データ",str(subject_num),"EMG"))
+            plt.savefig(os.path.join(path_to_data_dir,"解析データ",str(subject_num),"EMG",f"EMG_{experiment_num}.png"))
         if show:
             plt.show()
         else:
