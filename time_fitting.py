@@ -11,9 +11,9 @@ class Time_fitting():
     def __init__(self,experiment_num:int,subject_num:int,before_time:int=0,after_time:int=-1,delay=0,path_to_data_dir=r"C:\Users\tyasu\Desktop\修士研究用"):
         self.experiment_num = experiment_num
         self.delay=delay
-        self.path_to_polymate_log = rf"実験データ\{subject_num}\polymate\実験{experiment_num}.CSV"
-        self.path_to_smarteye_log=rf"実験データ\{subject_num}\smarteye\{experiment_num}.log"
-        self.path_to_DS_log=rf"実験データ\{subject_num}\ds_log\ds{experiment_num}.csv"
+        self.path_to_polymate_log = os.path.join(path_to_data_dir,rf"実験データ\{subject_num}\polymate\実験{experiment_num}.CSV")
+        self.path_to_smarteye_log=os.path.join(path_to_data_dir,rf"実験データ\{subject_num}\smarteye\{experiment_num}.log")
+        self.path_to_DS_log=os.path.join(path_to_data_dir,rf"実験データ\{subject_num}\ds_log\ds{experiment_num}.csv")
         self.smarteye_df:pd.DataFrame=pd.read_csv(self.path_to_smarteye_log, sep='\t')  # 列名はタブ文字で区切られている
         self.polymate_df:pd.DataFrame=pd.read_csv(self.path_to_polymate_log, header=3)
         self.DS_log_df:pd.DataFrame=pd.read_csv(self.path_to_DS_log, header=6,encoding="shift-jis")
@@ -26,8 +26,8 @@ class Time_fitting():
         self.smarteye_end_index=len(self.smarteye_df)-1
         self.DS_log_start_index=0
         self.DS_log_end_index=len(self.DS_log_df)-1
-        self.path_to_video=rf"実験データ\{subject_num}\camera\{experiment_num}.mp4"
-        self.cut_video_output_folder=rf"実験データ\{subject_num}\camera\cut"
+        self.path_to_video=os.path.join(path_to_data_dir,rf"実験データ\{subject_num}\camera\{experiment_num}.mp4")
+        self.cut_video_output_folder=os.path.join(path_to_data_dir,rf"実験データ\{subject_num}\camera\cut")
         self.before_time=before_time
         self.after_time=after_time
         self.smarteye_time=None
@@ -180,8 +180,8 @@ class Time_fitting():
     def cut_video(self):
         output_file_name = f'cut{self.experiment_num}.mp4'
         # 出力フォルダが存在しない場合、作成する
-        if not os.path.exists(os.path.join(self.path_to_data_dir,self.cut_video_output_folder)):
-            os.makedirs(os.path.join(self.path_to_data_dir,self.cut_video_output_folder))
+        if not os.path.exists(self.cut_video_output_folder):
+            os.makedirs(self.cut_video_output_folder)
 
         # 出力動画ファイル名を指定
         output_file = os.path.join(self.cut_video_output_folder, output_file_name)
