@@ -6,7 +6,7 @@ import os
 
 sampling_rate = 2000
 
-def emg_analysis(emg_df:pd.DataFrame,experiment_num:int,subject_num:int,show:bool=True,store:bool=True,path_to_data_dir=r"C:\Users\tyasu\Desktop\修士研究用"):
+def emg_analysis(emg_df:pd.DataFrame,experiment_num:int,subject_num:int,show:bool=True,store:bool=True,font_size:int=12,path_to_data_dir=r"C:\Users\tyasu\Desktop\修士研究用"):
     emg_np = emg_df.values
     emg_data = emg_np[:, 5].astype(np.float32)
 
@@ -36,6 +36,7 @@ def emg_analysis(emg_df:pd.DataFrame,experiment_num:int,subject_num:int,show:boo
         # グラフを表示する
         fig = plt.gcf()
         fig.set_size_inches(16, 12, forward=True)
+
         if store:
             if not os.path.exists(os.path.join(path_to_data_dir,fr"解析データ\{subject_num}")):
                 os.makedirs(os.path.join(path_to_data_dir,fr"解析データ\{subject_num}"))

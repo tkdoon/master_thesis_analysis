@@ -14,48 +14,130 @@ class DS_log_analysis():
             self.DS_log_np=self.DS_log_df.values
             self.times_np=self.DS_log_np[:,11]-self.DS_log_np[0,11]
             self.velocity_array=self.DS_log_np[:,34]
-        if not os.path.exists(os.path.join(self.path_to_data_dir,os.path.join(self.path_to_data_dir,fr"解析データ\{subject_num}"))):
-            os.makedirs(os.path.join(self.path_to_data_dir,os.path.join(self.path_to_data_dir,fr"解析データ\{subject_num}")))
-        if not os.path.exists(os.path.join(self.path_to_data_dir,os.path.join(self.path_to_data_dir,fr"解析データ\{subject_num}\DS_log"))):
-            os.makedirs(os.path.join(self.path_to_data_dir,os.path.join(self.path_to_data_dir,fr"解析データ\{subject_num}\DS_log")))
+        if not os.path.exists(os.path.join(path_to_data_dir,fr"解析データ\{subject_num}")):
+            os.makedirs(os.path.join(path_to_data_dir,fr"解析データ\{subject_num}"))
+        if not os.path.exists(os.path.join(path_to_data_dir,fr"解析データ\{subject_num}\DS_log")):
+            os.makedirs(os.path.join(path_to_data_dir,fr"解析データ\{subject_num}\DS_log"))
         self.acceleration=None
-        self.difference=None
+        self.min_difference=None
         self.relative_velocity=None
         self.DS_log_dfs:list=dfs
         self.experiment_nums=experiment_nums
-        self.self.path_to_data_dir=self.path_to_data_dir
-            
-            
-    def calculate_acceleration(self):
-        # 速さの変化を計算
-        delta_speed = np.diff(self.velocity_array)  # 速さの差分を計算
-        delta_time = np.diff(self.times_np)  # 時間の差分を計算
-
-        # 加速度のnumpy配列を計算
-        acceleration = delta_speed / delta_time
-        # 最初の要素に対する加速度を計算
-        initial_acceleration = acceleration[0]
-
-        # 加速度の配列の最初に追加
-        self.acceleration = np.insert(acceleration, 0, initial_acceleration)
+        self.path_to_data_dir=path_to_data_dir
+        self.rms_acceleration=None
+        self.rms_steering_angle=None
+        self.accelerator_variance=None
+        self.accelerator_mean=None
+        self.brake_variance=None
+        self.brake_mean=None
+        self.max_velocity=None
+        self.velocity_variance=None
+        self.velocity_mean=None
         
+    def delete_velocity_zero(self,data:np.array):
+        nonzero_indices = np.nonzero(self.velocity_array)[0]
+        return data[nonzero_indices]
+    
+    def calculate_parameters(self,delete_zero:bool):
+        if(delete_zero):
+            self.rms_steering_angle=np.sqrt(np.mean(np.square(self.delete_velocity_zero(self.DS_log_np[:,1]))))
+            self.accelerator_variance=np.var(self.delete_velocity_zero(self.DS_log_np[:,12]))
+            self.accelerator_mean=np.mean(self.delete_velocity_zero(self.DS_log_np[:,12]))
+            self.brake_variance=np.var(self.delete_velocity_zero(self.DS_log_np[:,13]))
+            self.brake_mean=np.mean(self.delete_velocity_zero(self.DS_log_np[:,13]))
+            self.rms_acceleration = np.sqrt(np.mean(np.square(self.delete_velocity_zero(self.acceleration))))
+            self.velocity_variance=np.var(self.delete_velocity_zero(self.velocity_array))
+            self.velocity_mean=np.mean(self.delete_velocity_zero(self.velocity_array))
+        else:
+            self.rms_steering_angle=np.sqrt(np.mean(np.square(self.DS_log_np[:,1])))
+            self.accelerator_variance=np.var(self.DS_log_np[:,12])
+            self.accelerator_mean=np.mean(self.DS_log_np[:,12])
+            self.brake_variance=np.var(self.DS_log_np[:,13])
+            self.brake_mean=np.mean(self.DS_log_np[:,13])
+            self.rms_acceleration = np.sqrt(np.mean(np.square(self.acceleration)))
+            self.velocity_variance=np.var(self.velocity_array)
+            self.velocity_mean=np.mean(self.velocity_array)
+        self.min_difference=np.min(self.difference)
+        self.max_velocity=np.max(self.velocity_array)
+        return
+
+    def calculate_acceleration(self,velocity_array,times_np,acceleration_vector_array):
+        # 速さの変化を計算
+        # delta_speed = np.diff(velocity_array)  # 速さの差分を計算
+        # delta_time = np.diff(times_np)  # 時間の差分を計算
+
+        # # 加速度のnumpy配列を計算
+        # acceleration = delta_speed / delta_time
+        # # 最初の要素に対する加速度を計算
+        # initial_acceleration = acceleration[0]
+        # # 加速度の配列の最初に追加
+        # self.acceleration = np.insert(acceleration, 0, initial_acceleration)
+        self.acceleration=np.sqrt(np.sum(acceleration_vector_array**2, axis=1))
         return self.acceleration
+    
+    
+    def show_acceleration(self,store:bool=True,show:bool=True,font_size:int=12):
+        fig=plt.figure(figsize=(16,12))
+        plt.plot(self.times_np,self.calculate_acceleration(self.velocity_array,self.times_np,self.DS_log_np[:,28:31]))
+        plt.title('Absolute value of acceleration')
+        plt.xlabel('time (s)')
+        plt.ylabel('acceleration(m/s^2)')
+
+        if store:
+            if not os.path.exists(os.path.join(self.path_to_data_dir,fr"解析データ\{self.subject_num}\DS_log\acceleration")):
+                os.makedirs(os.path.join(self.path_to_data_dir,fr"解析データ\{self.subject_num}\DS_log\acceleration"))
+            plt.savefig(os.path.join(self.path_to_data_dir,fr"解析データ\{self.subject_num}\DS_log\acceleration\acceleration_{self.experiment_num}.png"))
+        if show:
+            plt.show()
+        else:
+            plt.close()     
+            
+    def show_multi_acceleration(self,n,filename,titles:list=[],large_title:str=None,store:bool=True,show:bool=True,font_size:int=12,sharey:bool=True):
+        def make1graph(time_array,acceleration_array,n,index,titles:list=[]):
+            plt.subplot(n,1,index+1)
+            plt.plot(time_array, acceleration_array)
+            plt.xlabel('time(s)')
+            plt.ylabel('acceleration(m/s^2)')
+            # plt.yticks([0,2,4,6])
+            plt.grid()
+
+            if len(titles)!=0:
+                plt.title(titles[index])
+            
+        fig = plt.figure(figsize=(16,12))
+        plt.rcParams["font.size"] = font_size
+        for index,DS_log in enumerate(self.DS_log_dfs):
+            DS_log_np=DS_log.values
+            make1graph(DS_log_np[:,11]-DS_log_np[0,11],self.calculate_acceleration(DS_log_np[:,34],DS_log_np[:,11]-DS_log_np[0,11],DS_log_np[:,28:31]),n,index,titles)
+        if large_title:
+            plt.suptitle(large_title)
+        plt.tight_layout()
+
+        if store:
+            if not os.path.exists(os.path.join(self.path_to_data_dir,fr"解析データ\{self.subject_num}\DS_log\acceleration")):
+                os.makedirs(os.path.join(self.path_to_data_dir,fr"解析データ\{self.subject_num}\DS_log\acceleration"))
+            plt.savefig(os.path.join(self.path_to_data_dir,fr"解析データ\{self.subject_num}\DS_log\acceleration\multi_acceleration_{filename}.png"))
+        if show:
+            plt.show()
+        else:
+            plt.close()
     
     def calculate_distance_of_vehicles(self,car_position,bus_position):
         difference_xy=bus_position-car_position
-        difference=np.sqrt(np.sum(np.square(difference_xy),axis=1))
-        return difference
+        self.difference=np.sqrt(np.sum(np.square(difference_xy),axis=1))
+        return self.difference
     
     def calculate_relative_velocity(self,car_velocity,bus_velocity):
         relative_velocity=car_velocity-bus_velocity
         return relative_velocity
     
-    def show_velocity(self,store:bool=True,show:bool=True):
+    def show_velocity(self,store:bool=True,show:bool=True,font_size:int=12):
         fig=plt.figure(figsize=(16,12))
         plt.plot(self.times_np,self.velocity_array)
         plt.title('Velocity')
         plt.xlabel('time (s)')
         plt.ylabel('velocity(m/s)')
+
         if store:
             if not os.path.exists(os.path.join(self.path_to_data_dir,fr"解析データ\{self.subject_num}\DS_log\velocity")):
                 os.makedirs(os.path.join(self.path_to_data_dir,fr"解析データ\{self.subject_num}\DS_log\velocity"))
@@ -65,7 +147,7 @@ class DS_log_analysis():
         else:
             plt.close()
             
-    def show_multi_velocity(self,n,filename,titles:list=[],large_title:str=None,store:bool=True,show:bool=True):
+    def show_multi_velocity(self,n,filename,titles:list=[],large_title:str=None,store:bool=True,show:bool=True,font_size:int=12):
         def make1graph(time_array,velocity_array,n,index,titles:list=[]):
             plt.subplot(n,1,index+1)
             plt.plot(time_array, velocity_array)
@@ -77,12 +159,14 @@ class DS_log_analysis():
                 plt.title(titles[index])
             
         fig = plt.figure(figsize=(16,12))
+        plt.rcParams["font.size"] = font_size
         for index,DS_log in enumerate(self.DS_log_dfs):
             DS_log_np=DS_log.values
             make1graph(DS_log_np[:,11]-DS_log_np[0,11],DS_log_np[:,34],n,index,titles)
         if large_title:
             plt.suptitle(large_title)
         plt.tight_layout()
+
         if store:
             if not os.path.exists(os.path.join(self.path_to_data_dir,fr"解析データ\{self.subject_num}\DS_log\velocity")):
                 os.makedirs(os.path.join(self.path_to_data_dir,fr"解析データ\{self.subject_num}\DS_log\velocity"))
@@ -92,7 +176,7 @@ class DS_log_analysis():
         else:
             plt.close()
     
-    def show_distance_of_vehicles(self,store:bool=True,show:bool=True):
+    def show_distance_of_vehicles(self,store:bool=True,show:bool=True,font_size:int=12):
         fig=plt.figure(figsize=(16,12))
         plt.plot(self.times_np,self.calculate_distance_of_vehicles(car_position=self.DS_log_np[:,3:5]#(x,y)
                                                                    ,bus_position=self.DS_log_np[:,36:38]#(x,y)
@@ -100,6 +184,7 @@ class DS_log_analysis():
         plt.title('Distance between vehicles')
         plt.xlabel('time (s)')
         plt.ylabel('distance(m)')
+
         if store:
             if not os.path.exists(os.path.join(self.path_to_data_dir,fr"解析データ\{self.subject_num}\DS_log\distance_of_vehicles")):
                 os.makedirs(os.path.join(self.path_to_data_dir,fr"解析データ\{self.subject_num}\DS_log\distance_of_vehicles"))
@@ -109,24 +194,27 @@ class DS_log_analysis():
         else:
             plt.close()
             
-    def show_multi_distance_of_vehicles(self,n,filename,titles:list=[],large_title:str=None,store:bool=True,show:bool=True):
+    def show_multi_distance_of_vehicles(self,n,filename,titles:list=[],large_title:str=None,store:bool=True,show:bool=True,font_size:int=12):
         def make1graph(time_array,distance_of_vehicle_array,n,index,titles:list=[]):
             plt.subplot(n,1,index+1)
             plt.plot(time_array, distance_of_vehicle_array)
             plt.xlabel('time(s)')
-            plt.ylabel('Distance of Vehicles(m)')
+            plt.ylabel('distance(m)')
+            # plt.yticks([0,10,20,30,40,50])
             plt.grid()
 
             if len(titles)!=0:
                 plt.title(titles[index])
             
         fig = plt.figure(figsize=(16,12))
+        plt.rcParams["font.size"] = font_size
         for index,DS_log in enumerate(self.DS_log_dfs):
             DS_log_np=DS_log.values
             make1graph(DS_log_np[:,11]-DS_log_np[0,11],self.calculate_distance_of_vehicles(DS_log_np[:,3:5],DS_log_np[:,36:38]),n,index,titles)
         if large_title:
             plt.suptitle(large_title)
         plt.tight_layout()
+
         if store:
             if not os.path.exists(os.path.join(self.path_to_data_dir,fr"解析データ\{self.subject_num}\DS_log\distance_of_vehicles")):
                 os.makedirs(os.path.join(self.path_to_data_dir,fr"解析データ\{self.subject_num}\DS_log\distance_of_vehicles"))
@@ -136,12 +224,13 @@ class DS_log_analysis():
         else:
             plt.close()
         
-    def show_relative_velocity(self,store:bool=True,show:bool=True):
+    def show_relative_velocity(self,store:bool=True,show:bool=True,font_size:int=12):
         fig=plt.figure(figsize=(16,12))
         plt.plot(self.times_np,self.calculate_relative_velocity(car_velocity=self.velocity_array,bus_velocity=self.DS_log_np[:,42]))
         plt.title('Relative velocity')
         plt.xlabel('time (s)')
         plt.ylabel('velocity(m/s)')
+
         if store:
             if not os.path.exists(os.path.join(self.path_to_data_dir,fr"解析データ\{self.subject_num}\DS_log\relative_velocity")):
                 os.makedirs(os.path.join(self.path_to_data_dir,fr"解析データ\{self.subject_num}\DS_log\relative_velocity"))
@@ -151,24 +240,27 @@ class DS_log_analysis():
         else:
             plt.close()
             
-    def show_multi_relative_velocity(self,n,filename,titles:list=[],large_title:str=None,store:bool=True,show:bool=True):
+    def show_multi_relative_velocity(self,n,filename,titles:list=[],large_title:str=None,store:bool=True,show:bool=True,font_size:int=12):
         def make1graph(time_array,relative_velocity_array,n,index,titles:list=[]):
             plt.subplot(n,1,index+1)
             plt.plot(time_array, relative_velocity_array)
             plt.xlabel('time(s)')
-            plt.ylabel('Relative Velocity(m/s)')
+            plt.ylabel('Velocity(m/s)')
+            
             plt.grid()
 
             if len(titles)!=0:
                 plt.title(titles[index])
             
         fig = plt.figure(figsize=(16,12))
+        plt.rcParams["font.size"] = font_size
         for index,DS_log in enumerate(self.DS_log_dfs):
             DS_log_np=DS_log.values
             make1graph(DS_log_np[:,11]-DS_log_np[0,11],self.calculate_relative_velocity(DS_log_np[:,34],DS_log_np[:,42]),n,index,titles)
         if large_title:
             plt.suptitle(large_title)
         plt.tight_layout()
+
         if store:
             if not os.path.exists(os.path.join(self.path_to_data_dir,fr"解析データ\{self.subject_num}\DS_log\relative_velocity")):
                 os.makedirs(os.path.join(self.path_to_data_dir,fr"解析データ\{self.subject_num}\DS_log\relative_velocity"))
@@ -178,14 +270,15 @@ class DS_log_analysis():
         else:
             plt.close()
         
-    def show_accelerator_and_brake_pressure(self,store:bool=True,show:bool=True):
+    def show_accelerator_and_brake_pressure(self,store:bool=True,show:bool=True,font_size:int=12):
         fig=plt.figure(figsize=(16,12))
-        plt.plot(self.times_np,self.DS_log_np[:,12],label="accelerator")
+        plt.plot(self.times_np,self.low_pass_filter(self.DS_log_np[:,12],3,order=6),label="accelerator")
         plt.plot(self.times_np,self.DS_log_np[:,13],label="brake")
         plt.title('Accelerator and brake pressure')
         plt.xlabel('time (s)')
         plt.ylabel('pressure')
         plt.legend()  # 凡例を表示
+
         if store:
             if not os.path.exists(os.path.join(self.path_to_data_dir,fr"解析データ\{self.subject_num}\DS_log\accel_brake")):
                 os.makedirs(os.path.join(self.path_to_data_dir,fr"解析データ\{self.subject_num}\DS_log\accel_brake"))
@@ -196,13 +289,13 @@ class DS_log_analysis():
             plt.close()
             
             
-    def show_multi_accelerator_and_brake_pressure(self,n,filename,titles:list=[],large_title:str=None,store:bool=True,show:bool=True):
+    def show_multi_accelerator_and_brake_pressure(self,n,filename,titles:list=[],large_title:str=None,store:bool=True,show:bool=True,font_size:int=12):
         def make1graph(time_array,accelerator_array,brake_array,n,index,titles:list=[]):
             plt.subplot(n,1,index+1)
             plt.plot(time_array, accelerator_array,label="accelerator")
             plt.plot(time_array, brake_array,label="brake")
             plt.xlabel('time(s)')
-            plt.ylabel('accelerator and brake pressure(m/s)')
+            plt.ylabel('pressure')
             plt.grid()
             plt.legend()
 
@@ -210,12 +303,14 @@ class DS_log_analysis():
                 plt.title(titles[index])
             
         fig = plt.figure(figsize=(16,12))
+        plt.rcParams["font.size"] = font_size
         for index,DS_log in enumerate(self.DS_log_dfs):
             DS_log_np=DS_log.values
-            make1graph(DS_log_np[:,11]-DS_log_np[0,11],DS_log_np[:,12],DS_log_np[:,13],n,index,titles)
+            make1graph(DS_log_np[:,11]-DS_log_np[0,11],self.low_pass_filter(DS_log_np[:,12],3,order=6),DS_log_np[:,13],n,index,titles)
         if large_title:
             plt.suptitle(large_title)
         plt.tight_layout()
+
         if store:
             if not os.path.exists(os.path.join(self.path_to_data_dir,fr"解析データ\{self.subject_num}\DS_log\accel_brake")):
                 os.makedirs(os.path.join(self.path_to_data_dir,fr"解析データ\{self.subject_num}\DS_log\accel_brake"))
@@ -226,7 +321,54 @@ class DS_log_analysis():
             plt.close()
             
             
-    def show_steering_torque_and_angle(self,store:bool=True,show:bool=True):
+    def show_steering_angle(self,store:bool=True,show:bool=True,font_size:int=12):
+        steering_angle_array=self.DS_log_np[:,1]
+        fig=plt.figure(figsize=(16,12))
+        plt.plot(self.times_np,steering_angle_array,label="steering angle")
+        plt.title('Steering angle')
+        plt.xlabel('time (s)')
+        plt.ylabel('angle(deg)')
+
+        if store:
+            if not os.path.exists(os.path.join(self.path_to_data_dir,fr"解析データ\{self.subject_num}\DS_log\steering_angle")):
+                os.makedirs(os.path.join(self.path_to_data_dir,fr"解析データ\{self.subject_num}\DS_log\steering_angle"))
+            plt.savefig(os.path.join(self.path_to_data_dir,fr"解析データ\{self.subject_num}\DS_log\steering_angle\steering_angle_{self.experiment_num}.png"))
+        if show:
+            plt.show()
+        else:
+            plt.close()
+            
+    def show_multi_steering_angle(self,n,filename,titles:list=[],large_title:str=None,store:bool=True,show:bool=True,font_size:int=12):
+        def make1graph(time_array,steering_angle_array,n,index,titles:list=[]):
+            plt.subplot(n,1,index+1)
+            plt.plot(time_array, steering_angle_array,label="steering angle")
+            plt.xlabel('time(s)')
+            plt.ylabel('angle(deg)')
+            # plt.yticks([-10,-5,0,5])
+            plt.grid()
+
+            if len(titles)!=0:
+                plt.title(titles[index])
+            
+        fig = plt.figure(figsize=(16,12))
+        plt.rcParams["font.size"] = font_size
+        for index,DS_log in enumerate(self.DS_log_dfs):
+            DS_log_np=DS_log.values
+            make1graph(DS_log_np[:,11]-DS_log_np[0,11],DS_log_np[:,1],n,index,titles)
+        if large_title:
+            plt.suptitle(large_title)
+        plt.tight_layout()
+
+        if store:
+            if not os.path.exists(os.path.join(self.path_to_data_dir,fr"解析データ\{self.subject_num}\DS_log\steering_angle")):
+                os.makedirs(os.path.join(self.path_to_data_dir,fr"解析データ\{self.subject_num}\DS_log\steering_angle"))
+            plt.savefig(os.path.join(self.path_to_data_dir,fr"解析データ\{self.subject_num}\DS_log\steering_angle\multi_steering_angle_{filename}.png"))      
+        if show:
+            plt.show()
+        else:
+            plt.close()
+            
+    def show_steering_torque_and_angle(self,store:bool=True,show:bool=True,font_size:int=12):
         x=self.times_np
         y1=self.DS_log_np[:,1]
         y2=self.DS_log_np[:,2]
@@ -245,6 +387,7 @@ class DS_log_analysis():
         plt.legend()
         # fig.tight_layout()
         plt.title('Steering angle and torque')
+
         if store:
             if not os.path.exists(os.path.join(self.path_to_data_dir,fr"解析データ\{self.subject_num}\DS_log\steering")):
                 os.makedirs(os.path.join(self.path_to_data_dir,fr"解析データ\{self.subject_num}\DS_log\steering"))
@@ -254,7 +397,7 @@ class DS_log_analysis():
         else:
             plt.close()
             
-    def show_multi_steering_torque_and_angle(self,n,filename,titles:list=[],large_title:str=None,store:bool=True,show:bool=True):
+    def show_multi_steering_torque_and_angle(self,n,filename,titles:list=[],large_title:str=None,store:bool=True,show:bool=True,font_size:int=12):
         def make1graph(time_array,accelerator_array,brake_array,ax,titles:list=[]):
             x=time_array
             y1=accelerator_array
@@ -276,6 +419,7 @@ class DS_log_analysis():
                 plt.title(titles[index])
             
         fig = plt.figure(figsize=(16,12))
+        plt.rcParams["font.size"] = font_size
         fig, axes = plt.subplots(n, 1)
         for index,DS_log in enumerate(self.DS_log_dfs):
             DS_log_np=DS_log.values
@@ -283,6 +427,7 @@ class DS_log_analysis():
         if large_title:
             plt.suptitle(large_title)
         plt.tight_layout()
+
         if store:
             if not os.path.exists(os.path.join(self.path_to_data_dir,fr"解析データ\{self.subject_num}\DS_log\steering")):
                 os.makedirs(os.path.join(self.path_to_data_dir,fr"解析データ\{self.subject_num}\DS_log\steering"))
@@ -292,23 +437,27 @@ class DS_log_analysis():
         else:
             plt.close()
         
-    def analyze_all(self,store:bool=True,show:bool=True):
-        self.show_velocity(store,show)
-        self.show_distance_of_vehicles(store,show)
-        self.show_relative_velocity(store,show)
-        self.show_accelerator_and_brake_pressure(store,show)
-        self.show_steering_torque_and_angle(store,show)
+    def analyze_all(self,store:bool=True,show:bool=True,font_size:int=12):
+        self.show_velocity(store,show,font_size)
+        self.show_distance_of_vehicles(store,show,font_size)
+        self.show_relative_velocity(store,show,font_size)
+        self.show_accelerator_and_brake_pressure(store,show,font_size)
+        self.show_steering_torque_and_angle(store,show,font_size)
+        self.show_acceleration(store,show,font_size)
+        self.show_steering_angle(store,show,font_size)
         
-    def multi_analyze_all(self,titles:list=[],large_title_velocity:str=None,large_title_distance_of_vehicles:str=None,large_title_relative_velocity:str=None,large_title_accelerator_and_brake:str=None,large_title_steering_torque_and_angle:str=None,store:bool=True,show:bool=True):
+    def multi_analyze_all(self,titles:list=[],large_title_velocity:str=None,large_title_distance_of_vehicles:str=None,large_title_relative_velocity:str=None,large_title_accelerator_and_brake:str=None,large_title_steering_torque_and_angle:str=None,large_title_acceleration:str=None,large_title_steering_angle:str=None,store:bool=True,show:bool=True,font_size:int=12):
         n=len(self.DS_log_dfs)
         filename=""
         for experiment_num in self.experiment_nums:
             filename+=str(experiment_num)
-        self.show_multi_velocity(n=n,filename=filename,titles=titles,large_title=large_title_velocity,store=store,show=show)
-        self.show_multi_distance_of_vehicles(n=n,filename=filename,titles=titles,large_title=large_title_distance_of_vehicles,store=store,show=show)
-        self.show_multi_relative_velocity(n=n,filename=filename,titles=titles,large_title=large_title_relative_velocity,store=store,show=show)
-        self.show_multi_accelerator_and_brake_pressure(n=n,filename=filename,titles=titles,large_title=large_title_accelerator_and_brake,store=store,show=show)
-        self.show_multi_steering_torque_and_angle(n=n,filename=filename,titles=titles,large_title=large_title_steering_torque_and_angle,store=store,show=show)
+        self.show_multi_velocity(n=n,filename=filename,titles=titles,large_title=large_title_velocity,store=store,show=show,font_size=font_size)
+        self.show_multi_distance_of_vehicles(n=n,filename=filename,titles=titles,large_title=large_title_distance_of_vehicles,store=store,show=show,font_size=font_size)
+        self.show_multi_relative_velocity(n=n,filename=filename,titles=titles,large_title=large_title_relative_velocity,store=store,show=show,font_size=font_size)
+        self.show_multi_accelerator_and_brake_pressure(n=n,filename=filename,titles=titles,large_title=large_title_accelerator_and_brake,store=store,show=show,font_size=font_size)
+        self.show_multi_steering_torque_and_angle(n=n,filename=filename,titles=titles,large_title=large_title_steering_torque_and_angle,store=store,show=show,font_size=font_size)
+        self.show_multi_acceleration(n=n,filename=filename,titles=titles,large_title=large_title_acceleration,store=store,show=show,font_size=font_size)
+        self.show_multi_steering_angle(n=n,filename=filename,titles=titles,large_title=large_title_steering_angle,store=store,show=show,font_size=font_size)
         
     def low_pass_filter(self,data:np.array,cutoff_frequency:int,sampling_rate:int=120,order:int=5):
         from scipy.signal import butter, lfilter
@@ -319,10 +468,6 @@ class DS_log_analysis():
         return filtered_data
                 
     
-        
-    def calculate_variance(self):#分散
-        return
-        
         
 if __name__=="__main__":
     data=pd.read_csv(r"実験データ\1\ds_log\ds1.csv", header=6,encoding="shift-jis").values[:,12]

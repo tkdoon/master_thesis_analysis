@@ -7,9 +7,9 @@ import japanize_matplotlib
 class Nasatlx_analysis():
     def __init__(self,subject_num:int,path_to_data_dir=r"C:\Users\tyasu\Desktop\修士研究用") -> None:
         self.subject_num=subject_num
-        self.json_file_path=rf"実験データ\{subject_num}\{subject_num}.json"
         self.nasatlx_data=None
         self.path_to_data_dir=path_to_data_dir
+        self.json_file_path=os.path.join(path_to_data_dir,rf"実験データ\{subject_num}\{subject_num}.json")
         
     
     def open_file(self):
@@ -19,7 +19,7 @@ class Nasatlx_analysis():
     
     
     
-    def show_workload_frustration(self,experiment_nums:list[int],titles:list[str],large_title:str,show:bool=True,store:bool=True):
+    def show_workload_frustration(self,experiment_nums:list[int],titles:list[str],large_title:str,show:bool=True,store:bool=True,font_size:int=12):
         dictionary=self.open_file()
         frustration_list=[]
         overall_workload_list=[]
@@ -46,7 +46,7 @@ class Nasatlx_analysis():
 
         # インデックス
         indices = np.arange(len(categories))
-
+        plt.rcParams["font.size"] = font_size
         # データ1の棒グラフ
         plt.bar(indices, data1, bar_width, label='frustrationの値')
 
@@ -62,6 +62,7 @@ class Nasatlx_analysis():
         # グラフのタイトルと軸ラベル
             plt.title(large_title)
         plt.tight_layout()
+
 
         if store:
             if not os.path.exists(os.path.join(self.path_to_data_dir,fr"解析データ\{self.subject_num}")):
