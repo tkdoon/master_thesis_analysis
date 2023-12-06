@@ -14,8 +14,7 @@ categorized_experiment_num=[
             "large_title_mean_beat":None,
             "large_title_acceleration":None,
             "large_title_steering_angle":None,
-            "before_time":10,
-            "after_time":50},
+            "large_title_yaw":None},
         {
             "num":[2,3,4,5],
             "title":["バスの加速度:0.05G","バスの加速度:0.1G","バスの加速度:0.15G","バスの加速度:0.2G"],
@@ -31,8 +30,7 @@ categorized_experiment_num=[
             "large_title_mean_beat":"平均心拍数（自車：直進，バス：直進で信号が青のうちから減速するとき）",
             "large_title_acceleration":"加速度の絶対値（自車：直進，バス：直進で信号が青のうちから減速するとき)",
             "large_title_steering_angle":"ステアリング角（自車：直進，バス：直進で信号が青のうちから減速するとき）",
-            "before_time":10,
-            "after_time":50},
+            "large_title_yaw":"ヨー角（自車：直進，バス：直進で信号が青のうちから減速するとき）"},
         {
             "num":[6,7,8],
             "title":["バスの向心加速度:0.1G","バスの向心加速度:0.2G","バスの向心加速度:0.3G"],
@@ -48,8 +46,7 @@ categorized_experiment_num=[
             "large_title_mean_beat":"平均心拍数（自車：直進，バス：左折のとき）",
             "large_title_acceleration":"加速度の絶対値（自車：直進，バス：左折のとき）",
             "large_title_steering_angle":"ステアリング角（自車：直進，バス：左折のとき）",
-            "before_time":10,
-            "after_time":30},
+            "large_title_yaw":"ヨー角（自車：直進，バス：左折のとき）"},
         {
             "num":[9,10,11],
             "title":["バスの向心加速度:0.1G","バスの向心加速度:0.2G","バスの向心加速度:0.3G"],
@@ -65,8 +62,7 @@ categorized_experiment_num=[
             "large_title_mean_beat":"平均心拍数（自車：左折，バス：左折のとき）",
             "large_title_acceleration":"加速度の絶対値（自車：左折，バス：左折のとき）",
             "large_title_steering_angle":"ステアリング角（自車：左折，バス：左折のとき）",
-            "before_time":10,
-            "after_time":30},
+            "large_title_yaw":"ヨー角（自車：左折，バス：左折のとき）"},
         {
             "num":[12,13,14],
             "title":["バスの向心加速度:0.1G","バスの向心加速度:0.2G","バスの向心加速度:0.3G"],
@@ -82,8 +78,7 @@ categorized_experiment_num=[
             "large_title_mean_beat":"平均心拍数（自車：直進，バス：右折のとき）",
             "large_title_acceleration":"加速度の絶対値（自車：直進，バス：右折のとき）",
             "large_title_steering_angle":"ステアリング角（自車：直進，バス：右折のとき）",
-            "before_time":10,
-            "after_time":30},
+            "large_title_yaw":"ヨー角（自車：直進，バス：右折のとき）"},
         {
             "num":[15,16,17],
             "title":["バスの向心加速度:0.1G","バスの向心加速度:0.2G","バスの向心加速度:0.3G"],
@@ -97,8 +92,7 @@ categorized_experiment_num=[
             "large_title_gaze_direction":"視線の方向（自車：右折，バス：右折のとき）",
             "large_title_nasatlx":"nasa-tlxによるワークロード（自車：右折，バス：右折のとき）",
             "large_title_mean_beat":"平均心拍数（自車：右折，バス：右折のとき）","large_title_acceleration":"加速度の絶対値（自車：右折，バス：右折のとき）","large_title_steering_angle":"ステアリング角（自車：右折，バス：右折のとき）",
-            "before_time":10,
-            "after_time":30},
+            "large_title_yaw":"ヨー角（自車：右折，バス：右折のとき））"},
         {
             "num":[18,19,20],
             "title":["バスが右折するときの対向車の間隔:160m","バスが右折するときの対向車の間隔:200m","バスが右折するときの対向車の間隔:240m"],
@@ -114,8 +108,7 @@ categorized_experiment_num=[
             "large_title_mean_beat":"平均心拍数（自車：直進，バス：右折のとき）",
             "large_title_acceleration":"加速度の絶対値（自車：直進，バス：右折のとき）",
             "large_title_steering_angle":"ステアリング角（自車：直進，バス：右折のとき）",
-            "before_time":10,
-            "after_time":30},
+            "large_title_yaw":"ヨー角（自車：直進，バス：右折のとき）"},
         {
             "num":[21,22,23],
             "title":["バスが右折するときの対向車の間隔:160m","バスが右折するときの対向車の間隔:200m","バスが右折するときの対向車の間隔:240m"],
@@ -131,8 +124,7 @@ categorized_experiment_num=[
             "large_title_mean_beat":"平均心拍数（自車：右折，バス：右折のとき）",
             "large_title_acceleration":"加速度の絶対値（自車：右折，バス：右折のとき）",
             "large_title_steering_angle":"ステアリング角（自車：右折，バス：右折のとき）",
-            "before_time":10,
-            "after_time":30}
+            "large_title_yaw":"ヨー角（自車：右折，バス：右折のとき）"}
         ]
 # experiment_info=[
 #     # 直進
@@ -169,32 +161,32 @@ categorized_experiment_num=[
 experiment_info=[
     # 直進
         {"before_time":int(5228/120)-35,"after_time":50,"delete_zero":True},
-        {"before_time":int(7052/120)-40,"after_time":55,"delete_zero":True},
-        {"before_time":int(6856/120)-40,"after_time":55,"delete_zero":True},
-        {"before_time":int(6848/120)-40,"after_time":55,"delete_zero":True},
-        {"before_time":int(6850/120)-40,"after_time":55,"delete_zero":True},
+        {"before_time":int(7052/120)-43,"after_time":65,"delete_zero":True},
+        {"before_time":int(6856/120)-43,"after_time":65,"delete_zero":True},
+        {"before_time":int(6848/120)-43,"after_time":65,"delete_zero":True},
+        {"before_time":int(6850/120)-43,"after_time":65,"delete_zero":True},
         # バス＝左折，自車＝直進
-        {"before_time":int(2886/120)-10,"after_time":25,"delete_zero":False},
-        {"before_time":int(2850/120)-10,"after_time":25,"delete_zero":False},
-        {"before_time":int(2889/120)-10,"after_time":25,"delete_zero":False},
+        {"before_time":int(2886/120)-13,"after_time":33,"delete_zero":False},
+        {"before_time":int(2850/120)-13,"after_time":33,"delete_zero":False},
+        {"before_time":int(2889/120)-13,"after_time":33,"delete_zero":False},
         # バス=左折，自車＝左折
-        {"before_time":int(2886/120)-10,"after_time":30,"delete_zero":False},
-        {"before_time":int(2850/120)-10,"after_time":30,"delete_zero":False},
-        {"before_time":int(2889/120)-10,"after_time":30,"delete_zero":False},
+        {"before_time":int(2886/120)-13,"after_time":33,"delete_zero":False},
+        {"before_time":int(2850/120)-13,"after_time":33,"delete_zero":False},
+        {"before_time":int(2889/120)-13,"after_time":33,"delete_zero":False},
         # バス=右折，自車＝直進
-        {"before_time":int(2876/120)-10,"after_time":25,"delete_zero":False},
-        {"before_time":int(2822/120)-10,"after_time":25,"delete_zero":False},
-        {"before_time":int(2802/120)-10,"after_time":25,"delete_zero":False},
+        {"before_time":int(2876/120)-13,"after_time":33,"delete_zero":False},
+        {"before_time":int(2822/120)-13,"after_time":33,"delete_zero":False},
+        {"before_time":int(2802/120)-13,"after_time":33,"delete_zero":False},
         # バス＝右折，自車＝右折
-        {"before_time":int(2876/120)-10,"after_time":30,"delete_zero":False},
-        {"before_time":int(2822/120)-10,"after_time":30,"delete_zero":False},
-        {"before_time":int(2802/120)-10,"after_time":30,"delete_zero":False},
+        {"before_time":int(2876/120)-13,"after_time":33,"delete_zero":False},
+        {"before_time":int(2822/120)-13,"after_time":33,"delete_zero":False},
+        {"before_time":int(2802/120)-13,"after_time":33,"delete_zero":False},
         # バス＝右折，自車=直進，対向車
-        {"before_time":int(2508/120)-10,"after_time":45,"delete_zero":True},
         {"before_time":int(2508/120)-10,"after_time":50,"delete_zero":True},
         {"before_time":int(2508/120)-10,"after_time":55,"delete_zero":True},
+        {"before_time":int(2508/120)-10,"after_time":65,"delete_zero":True},
         # バス＝右折，自車＝右折，対向車
-        {"before_time":int(2508/120)-10,"after_time":45,"delete_zero":True},
         {"before_time":int(2508/120)-10,"after_time":50,"delete_zero":True},
-        {"before_time":int(2508/120)-10,"after_time":55,"delete_zero":True}
+        {"before_time":int(2508/120)-10,"after_time":55,"delete_zero":True},
+        {"before_time":int(2508/120)-10,"after_time":65,"delete_zero":True}
         ]

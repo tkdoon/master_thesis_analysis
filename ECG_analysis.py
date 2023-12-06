@@ -23,13 +23,16 @@ class ECG_analysis():
         self.filtered_data=None
         self.ts=None
         self.sdnn=None
+        self.outlier_num=None
+        self.used_df_num=None
+        self.outlier_rate=None
         self.analysis_path=os.path.join(path_to_data_dir,"解析データ",str(subject_num),"ECG")
         if not os.path.exists(os.path.join(path_to_data_dir,"解析データ",str(subject_num))):
             os.makedirs(os.path.join(path_to_data_dir,"解析データ",str(subject_num)))
         if not os.path.exists(os.path.join(path_to_data_dir,self.analysis_path)):
             os.makedirs(os.path.join(path_to_data_dir,self.analysis_path))
     
-    def calculate(self,ecg_np:np.array,modify:bool=True)->dict:
+    def calculate(self,ecg_np:np.array,fix:bool=True)->dict:
         def find_peaks():
             ecg_data = ecg.ecg(
                 signal=ecg_np, sampling_rate=2000., show=False, interactive=False)
@@ -43,7 +46,28 @@ class ECG_analysis():
             return ts_peaks
         ts_peaks=find_peaks()
         rri = np.diff(ts_peaks) * 1000
-        def modify_rri(rri_data,ts_peaks_data):
+        
+        def box_hide_fix_rri(rri_data,ts_peaks_data):
+            # 第1四分位数 (Q1) と第3四分位数 (Q3) を計算
+            q1 = np.percentile(rri_data, 25)
+            q3 = np.percentile(rri_data, 75)
+            
+            # IQR (四分位範囲) を計算
+            iqr = q3 - q1
+            
+            # 外れ値の閾値を計算
+            # 1.5だと外れ値以外も外れ値にしてしまう気がする
+            lower_bound = q1 - 1.5 * iqr
+            upper_bound = q3 + 1.5 * iqr
+            
+            # 外れ値のインデックスを取得
+            outliers = np.where((rri_data < lower_bound) | (rri_data > upper_bound))[0]
+            fixed_rri_data = np.delete(rri_data, outliers)
+            fixed_ts_peaks_data=np.delete(ts_peaks_data, outliers)
+            return {"rri":fixed_rri_data, "ts_peaks":fixed_ts_peaks_data,"outlier_num":len(outliers)}
+            
+        
+        def fix_rri(rri_data,ts_peaks_data):
             _rri=rri_data
             _ts_peaks=ts_peaks_data
             while True:
@@ -63,19 +87,22 @@ class ECG_analysis():
                 delete_index = delete_candidate_index[0][max_abs_diff_index]
                 _rri=np.delete(_rri,delete_index)
                 _ts_peaks=np.delete(_ts_peaks,delete_index)
-            modified_rri=_rri
-            modified_ts_peaks=_ts_peaks
-            return {"rri":modified_rri, "ts_peaks":modified_ts_peaks}
-        def easy_modify_rri(rri_data,ts_peaks_data):
+            fixed_rri=_rri
+            fixed_ts_peaks=_ts_peaks
+            return {"rri":fixed_rri, "ts_peaks":fixed_ts_peaks}
+        def easy_fix_rri(rri_data,ts_peaks_data):
             delete_index=np.where(np.logical_or(rri_data < 650, rri_data > 1000))
-            modified_rri=np.delete(rri_data,delete_index)
-            modified_ts_peaks=np.delete(ts_peaks_data,delete_index)
-            return {"rri":modified_rri, "ts_peaks":modified_ts_peaks}
+            fixed_rri=np.delete(rri_data,delete_index)
+            fixed_ts_peaks=np.delete(ts_peaks_data,delete_index)
+            return {"rri":fixed_rri, "ts_peaks":fixed_ts_peaks}
         
-        if modify:
-            modified_data=modify_rri(rri,ts_peaks)
-            rri=modified_data["rri"]
-            ts_peaks =modified_data["ts_peaks"] 
+        outlier_num=None
+        if fix:
+            fixed_data=box_hide_fix_rri(rri,ts_peaks)
+            rri=fixed_data["rri"]
+            ts_peaks =fixed_data["ts_peaks"] 
+            outlier_num=fixed_data["outlier_num"]
+        self.outlier_num=outlier_num
         self.max_beat=1.0/(np.min(rri)/1000/60)#1分あたりの回数
         self.min_beat=1.0/(np.max(rri)/1000/60)
         self.mean_beat=1.0/(np.mean(rri)/1000/60)
@@ -122,7 +149,7 @@ class ECG_analysis():
         self.hf_lf_rate=self.hf/self.lf
         print("hf:", self.hf)
         print("lf/hf:", self.hf_lf_rate)
-        return {"ts_peaks":ts_peaks,"rri":rri,"x":x,"y":y,"ts_1sec":ts_1sec,"rri_1sec":rri_1sec,"frequencies":frequencies,"amp_fft_rri":amp_fft_rri,"mean_beat":self.mean_beat}
+        return {"ts_peaks":ts_peaks,"rri":rri,"x":x,"y":y,"ts_1sec":ts_1sec,"rri_1sec":rri_1sec,"frequencies":frequencies,"amp_fft_rri":amp_fft_rri,"mean_beat":self.mean_beat,"outlier_num":outlier_num}
     
     def show_single_rri(self,ts_peaks,rri,ts_1sec,rri_1sec,x,y,show:bool=True,store:bool=True,font_size:int=12):
          # グラフを描画
@@ -141,7 +168,7 @@ class ECG_analysis():
         if store:
             if not os.path.exists(os.path.join(self.path_to_data_dir,self.analysis_path,"RRI")):
                 os.makedirs(os.path.join(self.path_to_data_dir,self.analysis_path,"RRI"))
-            plt.savefig(os.path.join(self.path_to_data_dir,self.analysis_path,"RRI","RRI_{self.experiment_num}.png"))
+            plt.savefig(os.path.join(self.path_to_data_dir,self.analysis_path,"RRI",f"RRI_{self.experiment_num}.png"))
         if show:
             plt.show()
         else:
@@ -162,7 +189,7 @@ class ECG_analysis():
 
             if not os.path.exists(os.path.join(self.path_to_data_dir,self.analysis_path,"FFT_spectrum")):
                 os.makedirs(os.path.join(self.path_to_data_dir,self.analysis_path,"FFT_spectrum"))
-            plt.savefig(os.path.join(self.path_to_data_dir,self.analysis_path,"FFT_spectrum","FFT_{self.experiment_num}.png"))
+            plt.savefig(os.path.join(self.path_to_data_dir,self.analysis_path,"FFT_spectrum",f"FFT_{self.experiment_num}.png"))
         if show:
             plt.show()
         else:
@@ -192,15 +219,18 @@ class ECG_analysis():
 
             if not os.path.exists(os.path.join(self.path_to_data_dir,self.analysis_path,"heart_rate_rri")):
                 os.makedirs(os.path.join(self.path_to_data_dir,self.analysis_path,"heart_rate_rri"))
-            plt.savefig(os.path.join(self.path_to_data_dir,self.analysis_path,"heart_rate_rri","heartrate_rri_{self.experiment_num}.png"))
+            plt.savefig(os.path.join(self.path_to_data_dir,self.analysis_path,"heart_rate_rri",f"heartrate_rri_{self.experiment_num}.png"))
         if show:
             plt.show()
         else:
             plt.close()
         
         
-    def show_single(self,show:bool=True,store:bool=True,font_size:int=12,modify:bool=True):
-        res=self.calculate(self.ecg_df.values[:, 4]*(-1),modify)
+    def show_single(self,show:bool=True,store:bool=True,font_size:int=12,fix:bool=True):
+        if(fix):
+            res,index=self.choose_best_rri_data(self.ecg_df.values[:, 4]*(-1),self.ecg_df.values[:, 2],self.ecg_df.values[:, 3],self.ecg_df.values[:, 6],self.ecg_df.values[:, 7])
+        else:
+            res=self.calculate(self.ecg_df.values[:, 4]*(-1),fix)
         ts_peaks=res["ts_peaks"]
         rri=res["rri"]
         x=res["x"]
@@ -209,6 +239,7 @@ class ECG_analysis():
         rri_1sec=res["rri_1sec"]
         frequencies=res["frequencies"]
         amp_fft_rri=res["amp_fft_rri"]
+        print(rri)
         self.show_single_rri(ts_peaks,rri,ts_1sec,rri_1sec,x,y,show,store,font_size)
         self.show_single_fft(frequencies,amp_fft_rri,show,store,font_size)
         self.show_beat_wave(ts_peaks,rri,ts_1sec,rri_1sec,x,y,show,store,font_size)
@@ -243,7 +274,7 @@ class ECG_analysis():
 
         if store:
 
-            plt.savefig(os.path.join(self.path_to_data_dir,self.analysis_path,"RRI","multi_RRI_{filename}.png"))
+            plt.savefig(os.path.join(self.path_to_data_dir,self.analysis_path,"RRI",f"multi_RRI_{filename}.png"))
         if show:
             plt.show()
         else:
@@ -313,18 +344,21 @@ class ECG_analysis():
 
             if not os.path.exists(os.path.join(self.path_to_data_dir,self.analysis_path,"mean_heart_rate")):
                 os.makedirs(os.path.join(self.path_to_data_dir,self.analysis_path,"mean_heart_rate"))
-            plt.savefig(os.path.join(self.path_to_data_dir,self.analysis_path,"mean_heart_rate","heart_rate_{filename}.png"))
+            plt.savefig(os.path.join(self.path_to_data_dir,self.analysis_path,"mean_heart_rate",f"heart_rate_{filename}.png"))
         if show:
             plt.show()
         else:
             plt.close()
             
             
-    def show_multiple(self,titles:list=[],large_title_rri:str=None,large_title_fft:str=None,large_title_mean_beat:str=None,show:bool=True,store:bool=True,font_size:int=12,modify:bool=True):
+    def show_multiple(self,titles:list=[],large_title_rri:str=None,large_title_fft:str=None,large_title_mean_beat:str=None,show:bool=True,store:bool=True,font_size:int=12,fix:bool=True):
         n=len(self.ecg_dfs)
         res_list=[]
         for ecg_df in self.ecg_dfs:
-            res=self.calculate(ecg_df.values[:, 4]*(-1),modify)
+            if(fix):
+                res,index=self.choose_best_rri_data(ecg_df.values[:, 4]*(-1),ecg_df.values[:, 2],ecg_df.values[:, 3],ecg_df.values[:, 6],ecg_df.values[:, 7])
+            else:
+                res=self.calculate(ecg_df.values[:, 4]*(-1),fix)
             res_list.append(res)
         filename=""
         for experiment_num in self.experiment_nums:
@@ -334,7 +368,29 @@ class ECG_analysis():
         self.show_multi_mean_beat(res_list,filename,titles,large_title_mean_beat,show,store,font_size)
 
 
-
+    def choose_best_rri_data(self,*data_list):
+        """一番使いたいデータを可変引数の一番最初に持ってきてください．そうすると，外れ値の数が同じときに一番使いたいデータの計算結果を返します．"""
+        res_list=[]
+        min_outlier=None
+        min_outliers_idx=0
+        for i,data in enumerate(data_list):
+            res=self.calculate(data,fix=True)
+            res_list.append(res)
+            if(min_outlier==None):
+                min_outlier=res["outlier_num"]
+                min_outliers_idx=i
+            elif(res["outlier_num"]<min_outlier):
+                min_outlier=res["outlier_num"]
+                min_outliers_idx=i
+            else:
+                pass
+            print(i,":",res["outlier_num"])
+        print("min_outliers_idx:",min_outliers_idx,"\nmin_outlier:",min_outlier)
+        self.outlier_num=min_outlier
+        self.used_df_num=min_outliers_idx
+        self.outlier_rate=min_outlier/len(data_list[0])
+        return res_list[min_outliers_idx],min_outliers_idx
+        
         
 
         

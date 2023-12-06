@@ -98,7 +98,7 @@ class Time_fitting():
                 
         index=self.calculate_polymate_index(self.smarteye_time,self.polymate_time)
         self.time_fit_polymate_df=self.polymate_df.iloc[index[0]:index[1]].reset_index(drop=True)
-        print("fit polymate dataframe",self.time_fit_polymate_df)
+        # print("fit polymate dataframe",self.time_fit_polymate_df)
         return self.time_fit_polymate_df
     
     def polymate_clock_to_seconds_from_start(self,clock):
@@ -132,7 +132,7 @@ class Time_fitting():
             self.smarteye_time=self.rtc_to_real_time_all(self.delay)
         index=self.calculate_smarteye_index(self.smarteye_time)
         self.time_fit_smarteye_df=self.smarteye_df.iloc[index[0]:index[1]].reset_index(drop=True)
-        print("fit smarteye dataframe",self.time_fit_smarteye_df)
+        # print("fit smarteye dataframe",self.time_fit_smarteye_df)
         return self.time_fit_smarteye_df
     
     def calculate_DS_log_index(self,DS_log_time):
@@ -156,7 +156,7 @@ class Time_fitting():
     def time_fitting_DS_log(self):
         index=self.calculate_DS_log_index(self.DS_log_time.astype(int))
         self.time_fit_DS_log_df=self.DS_log_df.iloc[index[0]:index[1]].reset_index(drop=True)
-        print("fit DS_log dataframe",self.time_fit_DS_log_df)
+        # print("fit DS_log dataframe",self.time_fit_DS_log_df)
         return self.time_fit_DS_log_df
             
             

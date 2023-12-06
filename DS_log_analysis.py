@@ -3,6 +3,7 @@ import os
 import numpy as np
 import matplotlib.pyplot as plt
 import japanize_matplotlib
+import math
 
 
 class DS_log_analysis():
@@ -34,12 +35,15 @@ class DS_log_analysis():
         self.max_velocity=None
         self.velocity_variance=None
         self.velocity_mean=None
+        self.max_yaw=None
+        self.yaw_variance=None
         
     def delete_velocity_zero(self,data:np.array):
         nonzero_indices = np.nonzero(self.velocity_array)[0]
         return data[nonzero_indices]
     
     def calculate_parameters(self,delete_zero:bool):
+        self.acceleration=np.sqrt(np.sum(self.DS_log_np[:,28:31]**2, axis=1))
         if(delete_zero):
             self.rms_steering_angle=np.sqrt(np.mean(np.square(self.delete_velocity_zero(self.DS_log_np[:,1]))))
             self.accelerator_variance=np.var(self.delete_velocity_zero(self.DS_log_np[:,12]))
@@ -47,8 +51,10 @@ class DS_log_analysis():
             self.brake_variance=np.var(self.delete_velocity_zero(self.DS_log_np[:,13]))
             self.brake_mean=np.mean(self.delete_velocity_zero(self.DS_log_np[:,13]))
             self.rms_acceleration = np.sqrt(np.mean(np.square(self.delete_velocity_zero(self.acceleration))))
+            self.acceleration_variance=np.var(self.delete_velocity_zero(self.acceleration))
             self.velocity_variance=np.var(self.delete_velocity_zero(self.velocity_array))
             self.velocity_mean=np.mean(self.delete_velocity_zero(self.velocity_array))
+            self.yaw_variance=np.var(self.delete_velocity_zero(self.DS_log_np[:,19]))
         else:
             self.rms_steering_angle=np.sqrt(np.mean(np.square(self.DS_log_np[:,1])))
             self.accelerator_variance=np.var(self.DS_log_np[:,12])
@@ -56,10 +62,13 @@ class DS_log_analysis():
             self.brake_variance=np.var(self.DS_log_np[:,13])
             self.brake_mean=np.mean(self.DS_log_np[:,13])
             self.rms_acceleration = np.sqrt(np.mean(np.square(self.acceleration)))
+            self.acceleration_variance=np.var(self.acceleration)
             self.velocity_variance=np.var(self.velocity_array)
             self.velocity_mean=np.mean(self.velocity_array)
+            self.yaw_variance=np.var(self.DS_log_np[:,19])
         self.min_difference=np.min(self.difference)
         self.max_velocity=np.max(self.velocity_array)
+        self.max_yaw=np.max(np.abs(self.DS_log_np[:,19]))
         return
 
     def calculate_acceleration(self,velocity_array,times_np,acceleration_vector_array):
@@ -75,10 +84,11 @@ class DS_log_analysis():
         # self.acceleration = np.insert(acceleration, 0, initial_acceleration)
         self.acceleration=np.sqrt(np.sum(acceleration_vector_array**2, axis=1))
         return self.acceleration
-    
+        
     
     def show_acceleration(self,store:bool=True,show:bool=True,font_size:int=12):
         fig=plt.figure(figsize=(16,12))
+        plt.rcParams["font.size"] = font_size
         plt.plot(self.times_np,self.calculate_acceleration(self.velocity_array,self.times_np,self.DS_log_np[:,28:31]))
         plt.title('Absolute value of acceleration')
         plt.xlabel('time (s)')
@@ -134,6 +144,7 @@ class DS_log_analysis():
     
     def show_velocity(self,store:bool=True,show:bool=True,font_size:int=12):
         fig=plt.figure(figsize=(16,12))
+        plt.rcParams["font.size"] = font_size
         plt.plot(self.times_np,self.velocity_array)
         plt.title('Velocity')
         plt.xlabel('time (s)')
@@ -179,6 +190,7 @@ class DS_log_analysis():
     
     def show_distance_of_vehicles(self,store:bool=True,show:bool=True,font_size:int=12):
         fig=plt.figure(figsize=(16,12))
+        plt.rcParams["font.size"] = font_size
         plt.plot(self.times_np,self.calculate_distance_of_vehicles(car_position=self.DS_log_np[:,3:5]#(x,y)
                                                                    ,bus_position=self.DS_log_np[:,36:38]#(x,y)
                                                                    ))
@@ -227,6 +239,7 @@ class DS_log_analysis():
         
     def show_relative_velocity(self,store:bool=True,show:bool=True,font_size:int=12):
         fig=plt.figure(figsize=(16,12))
+        plt.rcParams["font.size"] = font_size
         plt.plot(self.times_np,self.calculate_relative_velocity(car_velocity=self.velocity_array,bus_velocity=self.DS_log_np[:,42]))
         plt.title('Relative velocity')
         plt.xlabel('time (s)')
@@ -273,6 +286,7 @@ class DS_log_analysis():
         
     def show_accelerator_and_brake_pressure(self,store:bool=True,show:bool=True,font_size:int=12):
         fig=plt.figure(figsize=(16,12))
+        plt.rcParams["font.size"] = font_size
         plt.plot(self.times_np,self.low_pass_filter(self.DS_log_np[:,12],3,order=6),label="accelerator")
         plt.plot(self.times_np,self.DS_log_np[:,13],label="brake")
         plt.title('Accelerator and brake pressure')
@@ -325,6 +339,7 @@ class DS_log_analysis():
     def show_steering_angle(self,store:bool=True,show:bool=True,font_size:int=12):
         steering_angle_array=self.DS_log_np[:,1]
         fig=plt.figure(figsize=(16,12))
+        plt.rcParams["font.size"] = font_size
         plt.plot(self.times_np,steering_angle_array,label="steering angle")
         plt.title('Steering angle')
         plt.xlabel('time (s)')
@@ -374,6 +389,7 @@ class DS_log_analysis():
         y1=self.DS_log_np[:,1]
         y2=self.DS_log_np[:,2]
         
+        plt.rcParams["font.size"] = font_size
         fig, ax1 = plt.subplots()
         fig.set_size_inches(16, 12, forward=True)
         ax1.set_xlabel('time (s)')
@@ -437,6 +453,54 @@ class DS_log_analysis():
             plt.show()
         else:
             plt.close()
+            
+    def show_yaw(self,store:bool=True,show:bool=True,font_size:int=12):
+        fig=plt.figure(figsize=(16,12))
+        plt.rcParams["font.size"] = font_size
+        plt.plot(self.times_np,self.DS_log_np[:,19],label="yaw angle")
+        plt.title('Yaw angle')
+        plt.xlabel('time (s)')
+        plt.ylabel('angle(deg)')
+
+        if store:
+            if not os.path.exists(os.path.join(self.path_to_data_dir,self.analysis_path,"yaw_angle")):
+                os.makedirs(os.path.join(self.path_to_data_dir,self.analysis_path,"yaw_angle"))
+            plt.savefig(os.path.join(self.path_to_data_dir,self.analysis_path,"yaw_angle",f"yaw_angle_{self.experiment_num}.png"))
+        if show:
+            plt.show()
+        else:
+            plt.close()
+            
+            
+    def show_multi_yaw(self,n,filename,titles:list=[],large_title:str=None,store:bool=True,show:bool=True,font_size:int=12):
+        def make1graph(time_array,yaw_array,n,index,titles:list=[]):
+            plt.subplot(n,1,index+1)
+            plt.plot(time_array, yaw_array,label="yaw angle")
+            plt.xlabel('time(s)')
+            plt.ylabel('angle(deg)')
+            # plt.yticks([-10,-5,0,5])
+            plt.grid()
+
+            if len(titles)!=0:
+                plt.title(titles[index])
+            
+        fig = plt.figure(figsize=(16,12))
+        plt.rcParams["font.size"] = font_size
+        for index,DS_log in enumerate(self.DS_log_dfs):
+            DS_log_np=DS_log.values
+            make1graph(DS_log_np[:,11]-DS_log_np[0,11],DS_log_np[:,19],n,index,titles)
+        if large_title:
+            plt.suptitle(large_title)
+        plt.tight_layout()
+
+        if store:
+            if not os.path.exists(os.path.join(self.path_to_data_dir,self.analysis_path,"yaw_angle")):
+                os.makedirs(os.path.join(self.path_to_data_dir,self.analysis_path,"yaw_angle"))
+            plt.savefig(os.path.join(self.path_to_data_dir,self.analysis_path,"yaw_angle",f"multi_yaw_angle_{filename}.png"))      
+        if show:
+            plt.show()
+        else:
+            plt.close()
         
     def analyze_all(self,store:bool=True,show:bool=True,font_size:int=12):
         self.show_velocity(store,show,font_size)
@@ -446,8 +510,9 @@ class DS_log_analysis():
         self.show_steering_torque_and_angle(store,show,font_size)
         self.show_acceleration(store,show,font_size)
         self.show_steering_angle(store,show,font_size)
+        self.show_yaw(store,show,font_size)
         
-    def multi_analyze_all(self,titles:list=[],large_title_velocity:str=None,large_title_distance_of_vehicles:str=None,large_title_relative_velocity:str=None,large_title_accelerator_and_brake:str=None,large_title_steering_torque_and_angle:str=None,large_title_acceleration:str=None,large_title_steering_angle:str=None,store:bool=True,show:bool=True,font_size:int=12):
+    def multi_analyze_all(self,titles:list=[],large_title_velocity:str=None,large_title_distance_of_vehicles:str=None,large_title_relative_velocity:str=None,large_title_accelerator_and_brake:str=None,large_title_steering_torque_and_angle:str=None,large_title_acceleration:str=None,large_title_steering_angle:str=None,large_title_yaw:str=None,store:bool=True,show:bool=True,font_size:int=12):
         n=len(self.DS_log_dfs)
         filename=""
         for experiment_num in self.experiment_nums:
@@ -459,6 +524,7 @@ class DS_log_analysis():
         self.show_multi_steering_torque_and_angle(n=n,filename=filename,titles=titles,large_title=large_title_steering_torque_and_angle,store=store,show=show,font_size=font_size)
         self.show_multi_acceleration(n=n,filename=filename,titles=titles,large_title=large_title_acceleration,store=store,show=show,font_size=font_size)
         self.show_multi_steering_angle(n=n,filename=filename,titles=titles,large_title=large_title_steering_angle,store=store,show=show,font_size=font_size)
+        self.show_multi_yaw(n=n,filename=filename,titles=titles,large_title=large_title_yaw,store=store,show=show,font_size=font_size)
         
     def low_pass_filter(self,data:np.array,cutoff_frequency:int,sampling_rate:int=120,order:int=5):
         from scipy.signal import butter, lfilter

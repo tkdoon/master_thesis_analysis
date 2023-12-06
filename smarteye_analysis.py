@@ -25,7 +25,7 @@ class Smarteye_analysis():
         self.mean_distance=None
         self.analysis_path=os.path.join(path_to_data_dir,"解析データ",str(subject_num),"smarteye")
         
-    def delete_zero_data(self,np_data:np.array)->np.array:
+    def replace_zero_data(self,np_data:np.array)->np.array:
         # 直前の値に置き換える
         # データの値が0でないインデックスを取得
         nonzero_indices = np.where(np_data != 0)[0]
@@ -92,6 +92,7 @@ class Smarteye_analysis():
     def show_pupil_size(self,show:bool=True,store:bool=True,font_size:int=12):
         data=self.calculate_pupil_size()["data"]
         fig=plt.figure(figsize=(16,12))
+        plt.rcParams["font.size"] = font_size
         plt.plot(self.time_array,data[:,0],label="pupil size")
         plt.title('Pupil size')
         plt.xlabel('time (s)')
@@ -100,7 +101,7 @@ class Smarteye_analysis():
         if store:
             if not os.path.exists(os.path.join(self.path_to_data_dir,self.analysis_path,"pupil_size")):
                 os.makedirs(os.path.join(self.path_to_data_dir,self.analysis_path,"pupil_size"))
-            plt.savefig(os.path.join(self.path_to_data_dir,self.analysis_path,"pupil_size","pupil_size_{self.experiment_num}.png"))
+            plt.savefig(os.path.join(self.path_to_data_dir,self.analysis_path,"pupil_size",f"pupil_size_{self.experiment_num}.png"))
         if show:
             plt.show()
         else:
@@ -116,6 +117,7 @@ class Smarteye_analysis():
     def show_eyelid_opening_distance(self,show:bool=True,store:bool=True,font_size:int=12):
         data=self.calculate_eyelid_opening_distance()["data"]
         fig=plt.figure(figsize=(16,12))
+        plt.rcParams["font.size"] = font_size
         plt.plot(self.time_array,data[:,0],label="eyelid distance")
         plt.title('Eyelid distance')
         plt.xlabel('time (s)')
@@ -124,7 +126,7 @@ class Smarteye_analysis():
         if store:
             if not os.path.exists(os.path.join(self.path_to_data_dir,self.analysis_path,"eyelid")):
                 os.makedirs(os.path.join(self.path_to_data_dir,self.analysis_path,"eyelid"))
-            plt.savefig(os.path.join(self.path_to_data_dir,self.analysis_path,"eyelid","eyelid_{self.experiment_num}.png"))
+            plt.savefig(os.path.join(self.path_to_data_dir,self.analysis_path,"eyelid",f"eyelid_{self.experiment_num}.png"))
         if show:
             plt.show()
         else:
@@ -133,6 +135,7 @@ class Smarteye_analysis():
     def show_gaze_direction(self,show:bool=True,store:bool=True,font_size:int=12):
         gaze_direction_array=self.smarteye_np[:,73:77]
         fig=plt.figure(figsize=(16,12))
+        plt.rcParams["font.size"] = font_size
         data=self.delete_inaccurate_data(gaze_direction_array,3,0.5)
         plt.plot(self.time_array,data[:,0],label="direction-x")
         plt.plot(self.time_array,data[:,1],label="direction-y")
@@ -145,7 +148,7 @@ class Smarteye_analysis():
         if store:
             if not os.path.exists(os.path.join(self.path_to_data_dir,self.analysis_path,"gaze_direction")):
                 os.makedirs(os.path.join(self.path_to_data_dir,self.analysis_path,"gaze_direction"))
-            plt.savefig(os.path.join(self.path_to_data_dir,self.analysis_path,"gaze_direction","gaze_direction_{self.experiment_num}.png"))
+            plt.savefig(os.path.join(self.path_to_data_dir,self.analysis_path,"gaze_direction",f"gaze_direction_{self.experiment_num}.png"))
         if show:
             plt.show()
         else:
@@ -156,11 +159,14 @@ class Smarteye_analysis():
         angle_each=gaze_angle/number_of_lattice
         angle_each_rad=math.radians(angle_each) 
         np_data=self.smarteye_np[:,109:111]
-        
-        nonzero_data=self.shorten_array(np_data,"non_zero_2d")
-        gaze_heading=nonzero_data[:,0]
+        ## どちらかが0のときその行を消す
+        # nonzero_data=self.shorten_array(np_data,"non_zero_2d")
+        # gaze_heading=nonzero_data[:,0]
+        # gaze_pitch=nonzero_data[:,1]+math.pi/3
+        # 0のとき直前の値に置き換える
+        gaze_heading=self.replace_zero_data(np_data[:,0])
+        gaze_pitch=self.replace_zero_data(np_data[:,1])+math.pi/3
         gaze_heading=np.where(gaze_heading>0,gaze_heading-2/3*math.pi,gaze_heading+4/3*math.pi)
-        gaze_pitch=nonzero_data[:,1]+math.pi/3
         array_size=min(len(gaze_heading),len(gaze_pitch))
         def calculate_center_point():           
             count_array=np.zeros((number_of_lattice,number_of_lattice))
@@ -211,9 +217,6 @@ class Smarteye_analysis():
         prc=count/array_size
         return prc
                 
-              
-        
-            
             
     def show_single_all(self,show=True,store=True,font_size:int=12):
         self.show_gaze_direction(show,store,font_size)
@@ -248,7 +251,7 @@ class Smarteye_analysis():
         if store:
             if not os.path.exists(os.path.join(self.path_to_data_dir,self.analysis_path,"gaze_direction")):
                 os.makedirs(os.path.join(self.path_to_data_dir,self.analysis_path,"gaze_direction"))
-            plt.savefig(os.path.join(self.path_to_data_dir,self.analysis_path,"gaze_direction","multi_gaze_direction_{filename}.png"))
+            plt.savefig(os.path.join(self.path_to_data_dir,self.analysis_path,"gaze_direction",f"multi_gaze_direction_{filename}.png"))
         if show:
             plt.show()
         else:
