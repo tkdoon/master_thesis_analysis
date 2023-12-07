@@ -46,6 +46,7 @@ class ECG_analysis():
             return ts_peaks
         ts_peaks=find_peaks()
         rri = np.diff(ts_peaks) * 1000
+        original_rri=rri
         
         def box_hide_fix_rri(rri_data,ts_peaks_data):
             # 第1四分位数 (Q1) と第3四分位数 (Q3) を計算
@@ -149,7 +150,7 @@ class ECG_analysis():
         self.hf_lf_rate=self.hf/self.lf
         print("hf:", self.hf)
         print("lf/hf:", self.hf_lf_rate)
-        return {"ts_peaks":ts_peaks,"rri":rri,"x":x,"y":y,"ts_1sec":ts_1sec,"rri_1sec":rri_1sec,"frequencies":frequencies,"amp_fft_rri":amp_fft_rri,"mean_beat":self.mean_beat,"outlier_num":outlier_num}
+        return {"ts_peaks":ts_peaks,"rri":rri,"x":x,"y":y,"ts_1sec":ts_1sec,"rri_1sec":rri_1sec,"frequencies":frequencies,"amp_fft_rri":amp_fft_rri,"mean_beat":self.mean_beat,"outlier_num":outlier_num,"original_rri":original_rri}
     
     def show_single_rri(self,ts_peaks,rri,ts_1sec,rri_1sec,x,y,show:bool=True,store:bool=True,font_size:int=12):
          # グラフを描画
@@ -388,7 +389,7 @@ class ECG_analysis():
         print("min_outliers_idx:",min_outliers_idx,"\nmin_outlier:",min_outlier)
         self.outlier_num=min_outlier
         self.used_df_num=min_outliers_idx
-        self.outlier_rate=min_outlier/len(data_list[0])
+        self.outlier_rate=min_outlier/len(res_list[min_outliers_idx]["original_rri"])
         return res_list[min_outliers_idx],min_outliers_idx
         
         
