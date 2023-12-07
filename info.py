@@ -160,7 +160,7 @@ categorized_experiment_num=[
 #         ]
 experiment_info=[
     # 直進
-        {"before_time":int(5228/120)-35,"after_time":50,"delete_zero":True},
+        {"before_time":int(5228/120)-35,"after_time":65,"delete_zero":True},
         {"before_time":int(7052/120)-43,"after_time":65,"delete_zero":True},
         {"before_time":int(6856/120)-43,"after_time":65,"delete_zero":True},
         {"before_time":int(6848/120)-43,"after_time":65,"delete_zero":True},
@@ -170,17 +170,17 @@ experiment_info=[
         {"before_time":int(2850/120)-13,"after_time":33,"delete_zero":False},
         {"before_time":int(2889/120)-13,"after_time":33,"delete_zero":False},
         # バス=左折，自車＝左折
-        {"before_time":int(2886/120)-13,"after_time":33,"delete_zero":False},
-        {"before_time":int(2850/120)-13,"after_time":33,"delete_zero":False},
-        {"before_time":int(2889/120)-13,"after_time":33,"delete_zero":False},
+        {"before_time":int(2886/120)-13,"after_time":35,"delete_zero":False},
+        {"before_time":int(2850/120)-13,"after_time":35,"delete_zero":False},
+        {"before_time":int(2889/120)-13,"after_time":35,"delete_zero":False},
         # バス=右折，自車＝直進
-        {"before_time":int(2876/120)-13,"after_time":33,"delete_zero":False},
-        {"before_time":int(2822/120)-13,"after_time":33,"delete_zero":False},
-        {"before_time":int(2802/120)-13,"after_time":33,"delete_zero":False},
+        {"before_time":int(2876/120)-13,"after_time":35,"delete_zero":False},
+        {"before_time":int(2822/120)-13,"after_time":35,"delete_zero":False},
+        {"before_time":int(2802/120)-13,"after_time":35,"delete_zero":False},
         # バス＝右折，自車＝右折
-        {"before_time":int(2876/120)-13,"after_time":33,"delete_zero":False},
-        {"before_time":int(2822/120)-13,"after_time":33,"delete_zero":False},
-        {"before_time":int(2802/120)-13,"after_time":33,"delete_zero":False},
+        {"before_time":int(2876/120)-13,"after_time":35,"delete_zero":False},
+        {"before_time":int(2822/120)-13,"after_time":35,"delete_zero":False},
+        {"before_time":int(2802/120)-13,"after_time":35,"delete_zero":False},
         # バス＝右折，自車=直進，対向車
         {"before_time":int(2508/120)-10,"after_time":50,"delete_zero":True},
         {"before_time":int(2508/120)-10,"after_time":55,"delete_zero":True},
