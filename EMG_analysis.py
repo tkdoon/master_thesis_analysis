@@ -5,10 +5,10 @@ import matplotlib.pyplot as plt
 import os
 from biosppy.signals import emg,tools
 import scipy 
+from PIL import Image
 
 
-sampling_rate = 2000
-
+sampling_rate=2000
 def emg_analysis(emg_df:pd.DataFrame,experiment_num:int,subject_num:int,show:bool=True,store:bool=True,font_size:int=12,path_to_data_dir=r"C:\Users\tyasu\Desktop\修士研究用"):
     emg_np = emg_df.values
     emg_data = emg_np[:, 5].astype(np.float32)
@@ -152,11 +152,10 @@ def show_emg_graph(emg_df,subject_num,experiment_num,path_to_data_dir=r"C:\Users
         plt.savefig(os.path.join(path_to_data_dir,analysis_path,f"emg_graph_{experiment_num}.png"))
     if show:
         plt.show()
-        plt.close()
     else:
         plt.close()
 
-def check_burst(emg_df,subject_num,experiment_num)->list[tuple[float]]:
+def check_burst(emg_df,subject_num,experiment_num,path_to_data_dir=r"C:\Users\tyasu\Desktop\修士研究用")->list[tuple[float]]:
     sampling_rate = 2000
     emg_np = emg_df.values
     emg_data = emg_np[:, 5].astype(np.float32)
@@ -165,7 +164,11 @@ def check_burst(emg_df,subject_num,experiment_num)->list[tuple[float]]:
     check_list=detect_burst(arv_data,sampling_rate,0.05)  
     for i,check in enumerate(check_list):
         print(i,":",check[0],check[1])  
-    show_emg_graph(emg_df,subject_num,experiment_num,store=False,show=True,figsize=(64,20),dpi=300,font_size=12)
+    show_emg_graph(emg_df,subject_num,experiment_num,store=True,show=False,figsize=(64,20),dpi=300,font_size=12)
+    filename = os.path.join(path_to_data_dir,"解析データ",str(subject_num),"EMG",f"emg_graph_{experiment_num}.png")
+    imgPIL = Image.open(filename)  # 画像読み込み
+    imgPIL.show()  # 画像表示
+
     burst_list=[]
     if(len(check_list)!=0):
         while True:
