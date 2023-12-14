@@ -167,7 +167,11 @@ def check_burst(emg_df,subject_num,experiment_num,path_to_data_dir=r"C:\Users\ty
     show_emg_graph(emg_df,subject_num,experiment_num,store=True,show=False,figsize=(64,20),dpi=300,font_size=12,path_to_data_dir=path_to_data_dir)
     filename = os.path.join(path_to_data_dir,"解析データ",str(subject_num),"EMG",f"emg_graph_{experiment_num}.png")
     imgPIL = Image.open(filename)  # 画像読み込み
-    imgPIL.show()  # 画像表示
+    try:
+        import google.colab
+        display(imgPIL)
+    except ImportError:
+        imgPIL.show()  # 画像表示
 
     burst_list=[]
     if(len(check_list)!=0):
