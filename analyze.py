@@ -30,7 +30,7 @@ def main():
         # ecg_obj.show_single(False,True,fix=True,font_size=16)
         # emg_res=emg_analysis(polymate_df,experiment_num=experiment_num,subject_num=subject_num,show=False,path_to_data_dir=path_to_data_dir)
         # show_emg_graph(polymate_df,subject_num=subject_num,experiment_num=experiment_num,show=False)
-        burst_list=check_burst(polymate_df,subject_num=subject_num,experiment_num=experiment_num)
+        burst_list=check_burst(polymate_df,subject_num=subject_num,experiment_num=experiment_num,path_to_data_dir=path_to_data_dir)
         burst_times=len(burst_list)
         burst_seconds_mean=None
         burst_seconds_sum=None
