@@ -66,7 +66,9 @@ class DS_log_analysis():
             self.velocity_variance=np.var(self.velocity_array)
             self.velocity_mean=np.mean(self.velocity_array)
             self.yaw_variance=np.var(self.DS_log_np[:,19])
-        self.min_difference=np.min(self.difference)
+        self.min_difference=np.min(self.calculate_distance_of_vehicles(car_position=self.DS_log_np[:,3:5]#(x,y)
+                                                                   ,bus_position=self.DS_log_np[:,36:38]#(x,y)
+                                                                   ))
         self.max_velocity=np.max(self.velocity_array)
         self.max_yaw=np.max(np.abs(self.DS_log_np[:,19]))
         return
@@ -135,8 +137,8 @@ class DS_log_analysis():
     
     def calculate_distance_of_vehicles(self,car_position,bus_position):
         difference_xy=bus_position-car_position
-        self.difference=np.sqrt(np.sum(np.square(difference_xy),axis=1))
-        return self.difference
+        difference=np.sqrt(np.sum(np.square(difference_xy),axis=1))
+        return difference
     
     def calculate_relative_velocity(self,car_velocity,bus_velocity):
         relative_velocity=car_velocity-bus_velocity

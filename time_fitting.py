@@ -11,7 +11,7 @@ class Time_fitting():
     def __init__(self,experiment_num:int,subject_num:int,before_time:int=0,after_time:int=-1,delay=0,path_to_data_dir=r"C:\Users\tyasu\Desktop\修士研究用"):
         self.experiment_num = experiment_num
         self.delay=delay
-        self.path_to_polymate_log = os.path.join(path_to_data_dir,"実験データ",f"{subject_num}","polymate",f"実験{experiment_num}.CSV")
+        self.path_to_polymate_log = os.path.join(path_to_data_dir,"実験データ",f"{subject_num}","polymate","new",f"実験{experiment_num}.CSV")
         self.path_to_smarteye_log=os.path.join(path_to_data_dir,"実験データ",f"{subject_num}","smarteye",f"{experiment_num}.log")
         self.path_to_DS_log=os.path.join(path_to_data_dir,"実験データ",f"{subject_num}","ds_log",f"ds{experiment_num}.csv")
         self.smarteye_df:pd.DataFrame=pd.read_csv(self.path_to_smarteye_log, sep='\t')  # 列名はタブ文字で区切られている
