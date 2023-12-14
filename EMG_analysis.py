@@ -172,7 +172,7 @@ def check_burst(emg_df,subject_num,experiment_num,path_to_data_dir=r"C:\Users\ty
         display(imgPIL)
     except ImportError:
         imgPIL.show()  # 画像表示
-
+    print("image")
     burst_list=[]
     if(len(check_list)!=0):
         while True:
