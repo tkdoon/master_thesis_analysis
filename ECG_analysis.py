@@ -98,6 +98,7 @@ class ECG_analysis():
             return {"rri":fixed_rri, "ts_peaks":fixed_ts_peaks}
         
         outlier_num=None
+        print("original rri:",original_rri)
         if fix:
             fixed_data=box_hide_fix_rri(rri,ts_peaks)
             rri=fixed_data["rri"]
@@ -108,7 +109,7 @@ class ECG_analysis():
         self.min_beat=1.0/(np.max(rri)/1000/60)
         self.mean_beat=1.0/(np.mean(rri)/1000/60)
         print(f"max:{self.max_beat}回/min\nmin:{self.min_beat}回/min\nmean:{self.mean_beat}回/min")                  
-        print("rri:", rri)
+        print("fixed rri:", rri)
         spline_func = scipy.interpolate.interp1d(ts_peaks[:-1], rri, kind='cubic')
         ts_1sec = np.arange(ts_peaks[0], ts_peaks[-2], 1)
         rri_1sec = spline_func(ts_1sec).round(6)
@@ -165,7 +166,8 @@ class ECG_analysis():
         plt.ylabel('RRI [ms]')
         plt.grid()
         plt.legend()
-
+        fig_hold=fig
+        
         if store:
             if not os.path.exists(os.path.join(self.path_to_data_dir,self.analysis_path,"RRI")):
                 os.makedirs(os.path.join(self.path_to_data_dir,self.analysis_path,"RRI"))
@@ -174,6 +176,8 @@ class ECG_analysis():
             plt.show()
         else:
             plt.close()
+            
+        return fig_hold
             
     def show_single_fft(self,frequencies,amp_fft_rri,show:bool=True,store:bool=True,font_size:int=12):
         fig = plt.figure(figsize=(16,12))
@@ -185,6 +189,7 @@ class ECG_analysis():
         plt.grid()
         plt.xlim(0, 1)
         plt.ylim(0, 50000)
+        fig_hold=fig
 
         if store:
 
@@ -195,6 +200,8 @@ class ECG_analysis():
             plt.show()
         else:
             plt.close()
+            
+        return fig_hold
             
     def show_beat_wave(self,ts_peaks,rri,ts_1sec,rri_1sec,x,y,show:bool=True,store:bool=True,font_size:int=12):
         fig = plt.figure(figsize=(16,12))
@@ -244,6 +251,7 @@ class ECG_analysis():
         self.show_single_rri(ts_peaks,rri,ts_1sec,rri_1sec,x,y,show,store,font_size)
         self.show_single_fft(frequencies,amp_fft_rri,show,store,font_size)
         self.show_beat_wave(ts_peaks,rri,ts_1sec,rri_1sec,x,y,show,store,font_size)
+        return res
         
     def show_multiple_rri(self,calculate_res_list,n,filename,titles:list=[],large_title:str=None,show:bool=True,store:bool=True,font_size:int=12):
         def make1graph(ts_peaks,rri,ts_1sec,rri_1sec,x,y,n,index,titles:list=[]):
@@ -392,8 +400,6 @@ class ECG_analysis():
         self.outlier_rate=min_outlier/len(res_list[min_outliers_idx]["original_rri"])
         return res_list[min_outliers_idx],min_outliers_idx
         
-        
-
         
             
     

@@ -22,7 +22,7 @@ def emg_analysis(emg_df:pd.DataFrame,experiment_num:int,subject_num:int,show:boo
 
     signals, info = nk.emg_process(
         emg_data, sampling_rate=sampling_rate, report="text", method_activation="mixture"
-        ,threshold=0.8
+        ,threshold=0.9
         # ,size=20
         # ,threshold_size=22
         ,method_cleaning=None
@@ -112,49 +112,6 @@ def delete_outlier_by_std(data,n):
        
 
 
-def show_emg_graph(emg_df,subject_num,experiment_num,path_to_data_dir=r"C:\Users\tyasu\Desktop\修士研究用",font_size=16,store=True,show=True,figsize=(64,20),dpi:int=300):   
-    analysis_path=os.path.join("解析データ",str(subject_num),"EMG")
-    sampling_rate = 2000
-    emg_np = emg_df.values
-    emg_data = emg_np[:, 5].astype(np.float32)
-    emg_data=scipy.signal.detrend(emg_data)
-    # emg_data,_,_=tools.filter_signal(emg_data,sampling_rate=2000,ftype='butter',
-    #                                 band='highpass',
-    #                                 order=4,
-    #                                 frequency=5
-    #                                 )
-    # emg_data=median1d(emg_data,91)
-    time_array=np.arange(len(emg_data))/sampling_rate
-    def make1graph(data,n,index,titles:list=[]):
-        plt.subplot(n,1,index+1)
-        plt.plot(time_array, data)
-        plt.xlabel('time(s)')
-        plt.ylabel('Amplitude')
-        plt.grid()
-    plt.figure(figsize=figsize)
-    # plt.rcParams["figure.figsize"]=figsize
-    plt.rcParams['figure.figsize'] = figsize   
-    plt.rcParams["font.size"] = font_size
-    plt.rcParams['figure.dpi'] = dpi  # 解像度を指定
-    for index,data in enumerate(emg_np[:,2:8].T):
-        make1graph(data,6,index)
-
-    # plt.tight_layout()
-    
-    # plt.plot(time_array,emg_data)
-    # plt.title('emg')
-    # plt.xlabel('time (s)')
-    # plt.ylabel('amplitude')
-    # plt.ylim(top=80,bottom=-80)
-    if store:
-        if not os.path.exists(os.path.join(path_to_data_dir,analysis_path)):
-            os.makedirs(os.path.join(path_to_data_dir,analysis_path))
-        plt.savefig(os.path.join(path_to_data_dir,analysis_path,f"emg_graph_{experiment_num}.png"))
-    if show:
-        plt.show()
-    else:
-        plt.close()
-
 def check_burst(emg_df,subject_num,experiment_num,path_to_data_dir=r"C:\Users\tyasu\Desktop\修士研究用")->list[tuple[float]]:
     sampling_rate = 2000
     emg_np = emg_df.values
@@ -190,11 +147,11 @@ def check_burst(emg_df,subject_num,experiment_num,path_to_data_dir=r"C:\Users\ty
         
 
 def detect_burst(emg_data,sampling_rate,burst_time):
-    """burst_timeの単位はsec"""
+    """burst_timeの単位はsec，burst_timeはバーストを判定するための時間の閾値"""
     sd=np.std(emg_data)
     mean=np.mean(emg_data)
     print(f"mean:{mean},sd:{sd}")
-    threshold=mean+sd*2
+    threshold=mean+sd*2#閾値の設定
     continuous_num=burst_time*sampling_rate
     indices = np.where(np.logical_or(emg_data > threshold,emg_data<-threshold))[0]
     def count_consecutive_elements(arr):
@@ -215,9 +172,158 @@ def detect_burst(emg_data,sampling_rate,burst_time):
         if(count_info[0]>=continuous_num):
             check_list.append((count_info[1]/sampling_rate,count_info[2]/sampling_rate))
     return check_list
+
+
+class EMG_analysis():
+    def __init__(self,subject_num:int):
+        self.scenario1value:float=None
+        self.subject_num=subject_num
+        self.analysis_path=os.path.join("解析データ",str(subject_num),"EMG")
+        self.emg_dfs={}
         
+        
+    def convert_to_arv(self,np_data):
+        return np.abs(np_data)
+
+    def calculate_rms(self,np_data):
+        return np.sqrt(np.mean(np.square(np_data)))
+
+        
+    def calculate_vdv(self,np_data):
+        # 配列の4乗を計算
+        array_pow_4 = np.power(np_data, 4)
+
+        # 4乗平均を計算
+        mean_pow_4 = np.mean(array_pow_4)
+
+        # 4乗根を計算
+        fourth_root = np.power(mean_pow_4, 1/4)
+        return fourth_root
     
+    def calculate_percentage(self,value:float,number_of_divide:int):
+            return value/number_of_divide*100
+    
+    def main(self,polymate_df,method:str="rms",normalization_method:str="mean"):
+        """_summary_
+
+        Args:
+            method (str, optional): _description_. "rms" or "vdv" Defaults to "rms".
+            normalization_method (str, optional): _description_. "mean" or "scenario1".
+        """
+        emg_data=polymate_df.values[:, 5].astype(np.float32)
         
+        if(method=="rms"):
+            value=self.calculate_rms(emg_data)
+        elif(method=="vdv"):
+            value=self.calculate_vdv(emg_data)
+        else:
+            value=None
+        
+        if(normalization_method == 'mean'):
+            number_of_divide=np.mean(emg_data)
+        elif(normalization_method == 'scenario1'):
+            if(self.scenario1value==None):
+                self.scenario1value =value
+            number_of_divide=self.scenario1value
+        
+        return self.calculate_percentage(value,number_of_divide)                
+        
+
+    def show_polymate_graph(self,emg_df,experiment_num,n:int,path_to_data_dir=r"C:\Users\tyasu\Desktop\修士研究用",font_size=16,store=True,show=True,figsize=(64,20),dpi:int=300):
+        sampling_rate = 2000
+        emg_np = emg_df.values
+        emg_data = emg_np[:, 5].astype(np.float32)
+        # emg_data=scipy.signal.detrend(emg_data)
+        # emg_data,_,_=tools.filter_signal(emg_data,sampling_rate=2000,ftype='butter',
+        #                                 band='highpass',
+        #                                 order=4,
+        #                                 frequency=5
+        #                                 )
+        # emg_data=median1d(emg_data,91)
+        time_array=np.arange(len(emg_data))/sampling_rate
+        def make1graph(data,n,index,titles:list=[]):
+            plt.subplot(n,1,index+1)
+            plt.plot(time_array, scipy.signal.detrend(data))
+            plt.xlabel('time(s)')
+            plt.ylabel('Amplitude')
+            plt.grid()
+        plt.figure(figsize=figsize)
+        plt.rcParams['figure.figsize'] = figsize   
+        plt.rcParams["font.size"] = font_size
+        plt.rcParams['figure.dpi'] = dpi  # 解像度を指定
+        for index,data in enumerate(emg_np[:,2:8].T):
+            make1graph(data,6,index)
+
+        plt.tight_layout()
+        
+        # plt.plot(time_array,emg_data)
+        # plt.title('emg')
+        # plt.xlabel('time (s)')
+        # plt.ylabel('amplitude')
+        # plt.ylim(top=80,bottom=-80)
+        if store:
+            if not os.path.exists(os.path.join(path_to_data_dir,self.analysis_path)):
+                os.makedirs(os.path.join(path_to_data_dir,self.analysis_path))
+            plt.savefig(os.path.join(path_to_data_dir,self.analysis_path,f"polymate_graph_{experiment_num}_{n}.png"))
+        if show:
+            plt.show()
+        else:
+            plt.close()
+            
+    def show_emg_graph(self,emg_df,experiment_num,n:int,path_to_data_dir=r"C:\Users\tyasu\Desktop\修士研究用",font_size=16,store=True,show=True,figsize=(64,8),dpi:int=300):
+        sampling_rate = 2000
+        emg_np = emg_df.values
+        emg_data = emg_np[:, 5].astype(np.float32)
+        time_array=np.arange(len(emg_data))/sampling_rate
+        self.emg_dfs[experiment_num]=[emg_data, time_array]
+        plt.figure(figsize=figsize)
+        plt.rcParams['figure.figsize'] = figsize   
+        plt.rcParams["font.size"] = font_size
+        plt.plot(time_array,emg_data)
+        plt.title('emg')
+        plt.xlabel('time (s)')
+        plt.ylabel('amplitude')
+        # plt.ylim(top=80,bottom=-80)
+        if store:
+            if not os.path.exists(os.path.join(path_to_data_dir,self.analysis_path)):
+                os.makedirs(os.path.join(path_to_data_dir,self.analysis_path))
+            plt.savefig(os.path.join(path_to_data_dir,self.analysis_path,f"emg_graph_{experiment_num}_{n}.png"))
+        if show:
+            plt.show()
+        else:
+            plt.close()
+        
+        
+    def show_multi_emg_graph(self,experiment_nums,filename,titles:list=[],large_title:str=None,path_to_data_dir=r"C:\Users\tyasu\Desktop\修士研究用",font_size=16,store=True,show=True,figsize=(64,20),dpi:int=300):
+        def make1graph(time_array,emg_data,n,index,titles:list=[]):
+            plt.subplot(n,1,index+1)
+            plt.plot(time_array,emg_data)
+            plt.title('emg')
+            plt.xlabel('time (s)')
+            plt.ylabel('amplitude')
+            if len(titles)!=0:
+                plt.title(titles[index])
+        fig = plt.figure(figsize=(16,12))
+        plt.rcParams['figure.figsize'] = figsize   
+        plt.rcParams["font.size"] = font_size
+        for index,experiment_num in enumerate(experiment_nums):
+            data=self.emg_dfs[experiment_num]
+            make1graph(data[1],data[0],len(experiment_nums),index,titles)
+        if large_title:
+            plt.suptitle(large_title)
+        plt.tight_layout()
+
+        if store:
+            if not os.path.exists(os.path.join(path_to_data_dir,self.analysis_path)):
+                os.makedirs(os.path.join(path_to_data_dir,self.analysis_path))
+            plt.savefig(os.path.join(path_to_data_dir,self.analysis_path,f"multi_emg_graph_{filename}.png"))
+        if show:
+            plt.show()
+        else:
+            plt.close()
+        
+        
+
         
 if __name__=="__main__":
     path = r"..\実験データ\1\polymate\実験1.CSV"

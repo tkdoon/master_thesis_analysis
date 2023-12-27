@@ -25,28 +25,48 @@ class Smarteye_analysis():
         self.mean_distance=None
         self.analysis_path=os.path.join(path_to_data_dir,"解析データ",str(subject_num),"smarteye")
         
-    def replace_zero_data(self,np_data:np.array)->np.array:
-        # 直前の値に置き換える
-        # データの値が0でないインデックスを取得
-        nonzero_indices = np.where(np_data != 0)[0]
+    def replace_zero_data(self,np_data:np.array,replace_method:str="linear")->np.array:
+        """直前の値に置き換えるときはreplace_methodをpreviousに，線形補間するときは，replace_methodをlinearに"""
+        if(replace_method=="previous"):
+            # 直前の値に置き換える
+            # データの値が0でないインデックスを取得
+            nonzero_indices = np.where(np_data != 0)[0]
 
-        # # データの値が0でない部分の平均値を計算
-        # mean_value = np.mean(np_data[nonzero_indices])
-        
-        prev_value = None
+            # # データの値が0でない部分の平均値を計算
+            # mean_value = np.mean(np_data[nonzero_indices])
+            
+            prev_value = None
 
-        for i in range(len(np_data)):
-            if np_data[i] == 0:
-                if prev_value is not None:
-                    np_data[i] = prev_value
+            for i in range(len(np_data)):
+                if np_data[i] == 0:
+                    if prev_value is not None:
+                        np_data[i] = prev_value
+                    else:
+                        # 0の前に値がない場合、そのままにしておくか、別の初期値を設定することもできます。
+                        np_data[i] = 0  # 0の前に値がない場合、0のままにする例
+
                 else:
-                    # 0の前に値がない場合、そのままにしておくか、別の初期値を設定することもできます。
-                    np_data[i] = 0  # 0の前に値がない場合、0のままにする例
+                    prev_value = np_data[i]
 
+            return np_data
+        elif(replace_method=="linear"):
+            # 0でない要素のインデックスを取得
+            nonzero_indices = np.nonzero(np_data)[0]
+
+            # 0でない要素が2つ以上存在する場合にのみ線形補間を行う
+            if len(nonzero_indices) >= 2:
+                # 0でない要素のインデックスを使用して、線形補間を行う
+                np_data = np_data.astype(float)
+                interpolated_values = np.interp(np.arange(len(np_data)), nonzero_indices, np_data[nonzero_indices])
+                
+                # 新しい配列に線形補間された値をセット
+                interpolated = np.where(np_data == 0, interpolated_values, np_data)
+                return interpolated
             else:
-                prev_value = np_data[i]
-
-        return np_data
+                raise ValueError("線形補間が行えません。非ゼロの要素が2つ以上必要です。")
+        else:
+            raise ValueError("replace_methodの値が違います．")
+        
     
     def shorten_array(self,data:np.array,method:str):
         if(method == "non_zero_1d"):
@@ -76,6 +96,7 @@ class Smarteye_analysis():
         return np_data
     
     def calculate_parameters(self):
+        
         self.calculate_pupil_size()
         self.prc=self.calculate_PRC()
         self.calculate_eyelid_opening_distance()
@@ -159,6 +180,7 @@ class Smarteye_analysis():
         angle_each=gaze_angle/number_of_lattice
         angle_each_rad=math.radians(angle_each) 
         np_data=self.smarteye_np[:,109:111]
+
         ## どちらかが0のときその行を消す
         # nonzero_data=self.shorten_array(np_data,"non_zero_2d")
         # gaze_heading=nonzero_data[:,0]

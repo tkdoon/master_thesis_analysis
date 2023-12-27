@@ -2,7 +2,7 @@ import datetime
 import pytz
 
 
-def calculate_real_time(rtc_value,delay):
+def calculate_real_time(rtc_value,delay)->datetime.datetime:
     # リアルタイムクロックの値から1601年1月1日を基準にした秒数を計算
     # 1秒 = 10^7 クロックサイクル
     seconds_since_1601 = rtc_value / 10**7

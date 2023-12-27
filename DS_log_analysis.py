@@ -54,7 +54,7 @@ class DS_log_analysis():
             self.acceleration_variance=np.var(self.delete_velocity_zero(self.acceleration))
             self.velocity_variance=np.var(self.delete_velocity_zero(self.velocity_array))
             self.velocity_mean=np.mean(self.delete_velocity_zero(self.velocity_array))
-            self.yaw_variance=np.var(self.delete_velocity_zero(self.DS_log_np[:,19]))
+            self.yaw_variance=np.var(self.delete_velocity_zero(self.DS_log_np[:,21]))
         else:
             self.rms_steering_angle=np.sqrt(np.mean(np.square(self.DS_log_np[:,1])))
             self.accelerator_variance=np.var(self.DS_log_np[:,12])
@@ -65,12 +65,12 @@ class DS_log_analysis():
             self.acceleration_variance=np.var(self.acceleration)
             self.velocity_variance=np.var(self.velocity_array)
             self.velocity_mean=np.mean(self.velocity_array)
-            self.yaw_variance=np.var(self.DS_log_np[:,19])
+            self.yaw_variance=np.var(self.DS_log_np[:,21])
         self.min_difference=np.min(self.calculate_distance_of_vehicles(car_position=self.DS_log_np[:,3:5]#(x,y)
                                                                    ,bus_position=self.DS_log_np[:,36:38]#(x,y)
                                                                    ))
         self.max_velocity=np.max(self.velocity_array)
-        self.max_yaw=np.max(np.abs(self.DS_log_np[:,19]))
+        self.max_yaw=np.max(np.abs(self.DS_log_np[:,21]))
         return
 
     def calculate_acceleration(self,velocity_array,times_np,acceleration_vector_array):
@@ -289,7 +289,7 @@ class DS_log_analysis():
     def show_accelerator_and_brake_pressure(self,store:bool=True,show:bool=True,font_size:int=12):
         fig=plt.figure(figsize=(16,12))
         plt.rcParams["font.size"] = font_size
-        plt.plot(self.times_np,self.low_pass_filter(self.DS_log_np[:,12],3,order=6),label="accelerator")
+        plt.plot(self.times_np,self.low_pass_filter(self.DS_log_np[:,12],3,order=2),label="accelerator")
         plt.plot(self.times_np,self.DS_log_np[:,13],label="brake")
         plt.title('Accelerator and brake pressure')
         plt.xlabel('time (s)')
@@ -323,7 +323,7 @@ class DS_log_analysis():
         plt.rcParams["font.size"] = font_size
         for index,DS_log in enumerate(self.DS_log_dfs):
             DS_log_np=DS_log.values
-            make1graph(DS_log_np[:,11]-DS_log_np[0,11],self.low_pass_filter(DS_log_np[:,12],3,order=6),DS_log_np[:,13],n,index,titles)
+            make1graph(DS_log_np[:,11]-DS_log_np[0,11],self.low_pass_filter(DS_log_np[:,12],3,order=2),DS_log_np[:,13],n,index,titles)
         if large_title:
             plt.suptitle(large_title)
         plt.tight_layout()
@@ -459,7 +459,7 @@ class DS_log_analysis():
     def show_yaw(self,store:bool=True,show:bool=True,font_size:int=12):
         fig=plt.figure(figsize=(16,12))
         plt.rcParams["font.size"] = font_size
-        plt.plot(self.times_np,self.DS_log_np[:,19],label="yaw angle")
+        plt.plot(self.times_np,self.DS_log_np[:,21],label="yaw angle")
         plt.title('Yaw angle')
         plt.xlabel('time (s)')
         plt.ylabel('angle(deg)')
@@ -490,7 +490,7 @@ class DS_log_analysis():
         plt.rcParams["font.size"] = font_size
         for index,DS_log in enumerate(self.DS_log_dfs):
             DS_log_np=DS_log.values
-            make1graph(DS_log_np[:,11]-DS_log_np[0,11],DS_log_np[:,19],n,index,titles)
+            make1graph(DS_log_np[:,11]-DS_log_np[0,11],DS_log_np[:,21],n,index,titles)
         if large_title:
             plt.suptitle(large_title)
         plt.tight_layout()
@@ -528,12 +528,12 @@ class DS_log_analysis():
         self.show_multi_steering_angle(n=n,filename=filename,titles=titles,large_title=large_title_steering_angle,store=store,show=show,font_size=font_size)
         self.show_multi_yaw(n=n,filename=filename,titles=titles,large_title=large_title_yaw,store=store,show=show,font_size=font_size)
         
-    def low_pass_filter(self,data:np.array,cutoff_frequency:int,sampling_rate:int=120,order:int=5):
-        from scipy.signal import butter, lfilter
+    def low_pass_filter(self,data:np.array,cutoff_frequency:int,sampling_rate:int=120,order:int=2):
+        from scipy.signal import butter, lfilter,filtfilt
         nyquist = 0.5 * sampling_rate
         normal_cutoff = cutoff_frequency / nyquist
         b, a = butter(order, normal_cutoff, btype='low', analog=False)
-        filtered_data = lfilter(b, a, data)
+        filtered_data = filtfilt(b, a, data)
         return filtered_data
                 
     
