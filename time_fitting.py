@@ -212,7 +212,8 @@ class Time_fitting():
         frame_width = int(cap.get(3))
         frame_height = int(cap.get(4))
         frame_rate = int(cap.get(5))
-        fourcc = int(cap.get(6))
+        # fourcc = int(cap.get(6))
+        fourcc=cv2.VideoWriter_fourcc(*'XVID')
         start_time=self.polymate_clock_to_seconds_from_start(self.time_fit_polymate_df["CLOCK"].values[0])
         end_time=self.polymate_clock_to_seconds_from_start(self.time_fit_polymate_df["CLOCK"].values[-1])
         # 開始時間と終了時間をフレーム番号に変換
