@@ -7,7 +7,7 @@ import os
 import japanize_matplotlib
 
 class ECG_analysis():
-    def __init__(self,subject_num:int,experiment_num:int=None,experiment_nums:list=None,ecg_df:pd.DataFrame =None,ecg_dfs:list=None,path_to_data_dir=r"C:\Users\tyasu\Desktop\修士研究用") -> None:
+    def __init__(self,subject_num:int,experiment_num:int=None,experiment_nums:list=None,ecg_df:pd.DataFrame =None,before10s_df:pd.DataFrame=None,ecg_dfs:list[pd.DataFrame]=None,path_to_data_dir=r"C:\Users\tyasu\Desktop\修士研究用") -> None:
         self.ecg_df= ecg_df
         self.experiment_num = experiment_num
         self.ecg_dfs=ecg_dfs
@@ -26,84 +26,97 @@ class ECG_analysis():
         self.outlier_num=None
         self.used_df_num=None
         self.outlier_rate=None
+        self.before10s_rri=None
+        self.normalized_sdnn=None
+        self.normalized_max_rri=None
+        self.normalized_min_rri=None
+        self.normalized_mean_rri=None
         self.analysis_path=os.path.join(path_to_data_dir,"解析データ",str(subject_num),"ECG")
         if not os.path.exists(os.path.join(path_to_data_dir,"解析データ",str(subject_num))):
             os.makedirs(os.path.join(path_to_data_dir,"解析データ",str(subject_num)))
         if not os.path.exists(os.path.join(path_to_data_dir,self.analysis_path)):
             os.makedirs(os.path.join(path_to_data_dir,self.analysis_path))
-    
-    def calculate(self,ecg_np:np.array,fix:bool=True)->dict:
-        def find_peaks():
-            ecg_data = ecg.ecg(
-                signal=ecg_np, sampling_rate=2000., show=False, interactive=False)
+        self.before10s_df=before10s_df
 
-            (ts, filtered, rpeaks, templates_ts, templates, heart_rate_ts, heart_rate) = ecg_data
-            self.filtered_data=filtered
-            self.ts=ts
-            rpeaks_christov, = ecg.christov_segmenter(filtered, 2000.)
-            # クリストフのアルゴリズムを使用
-            ts_peaks = ts[rpeaks_christov]
-            return ts_peaks
-        ts_peaks=find_peaks()
+        
+    def find_peaks(self,ecg_np):
+        ecg_data = ecg.ecg(
+            signal=ecg_np, sampling_rate=2000., show=False, interactive=False)
+
+        (ts, filtered, rpeaks, templates_ts, templates, heart_rate_ts, heart_rate) = ecg_data
+
+        rpeaks_christov, = ecg.christov_segmenter(filtered, 2000.)
+        # クリストフのアルゴリズムを使用
+        ts_peaks = ts[rpeaks_christov]
+        return ts_peaks,ts,filtered
+    
+    def box_hide_fix_rri(self,rri_data,ts_peaks_data):
+        # 第1四分位数 (Q1) と第3四分位数 (Q3) を計算
+        q1 = np.percentile(rri_data, 25)
+        q3 = np.percentile(rri_data, 75)
+        
+        # IQR (四分位範囲) を計算
+        iqr = q3 - q1
+        
+        # 外れ値の閾値を計算
+        # 1.5だと外れ値以外も外れ値にしてしまう気がする
+        lower_bound = q1 - 1.5 * iqr
+        upper_bound = q3 + 1.5 * iqr
+        
+        # 外れ値のインデックスを取得
+        outliers = np.where((rri_data < lower_bound) | (rri_data > upper_bound))[0]
+        fixed_rri_data = np.delete(rri_data, outliers)
+        fixed_ts_peaks_data=np.delete(ts_peaks_data, outliers)
+        return {"rri":fixed_rri_data, "ts_peaks":fixed_ts_peaks_data,"outlier_num":len(outliers)}
+        
+    
+    def fix_rri(self,rri_data,ts_peaks_data):
+        _rri=rri_data
+        _ts_peaks=ts_peaks_data
+        while True:
+            rri_mean=np.mean(_rri)
+            # まず、指定の条件に合うデータを見つけて delete_index に格納
+            condition = np.logical_or(_rri < rri_mean * 0.6, _rri > rri_mean * 1.4)
+            delete_candidate_index = np.where(condition)
+            if len(delete_candidate_index[0])==0:
+                break
+            # 条件に合うデータのみを抽出
+            filtered_data = _rri[condition]
+
+            # 抽出したデータの中で rri_data - rri_mean の絶対値が最大のものを見つける
+            max_abs_diff_index = np.argmax(np.abs(filtered_data - rri_mean))
+
+            # 最大絶対値の差を持つデータのインデックスを取得
+            delete_index = delete_candidate_index[0][max_abs_diff_index]
+            _rri=np.delete(_rri,delete_index)
+            _ts_peaks=np.delete(_ts_peaks,delete_index)
+        fixed_rri=_rri
+        fixed_ts_peaks=_ts_peaks
+        return {"rri":fixed_rri, "ts_peaks":fixed_ts_peaks}
+    
+    def easy_fix_rri(self,rri_data,ts_peaks_data):
+        rri_mean=np.mean(rri_data)
+        outliers=np.where(np.logical_or(rri_data < rri_mean*0.6, rri_data > rri_mean*1.4))[0]
+        fixed_rri=np.delete(rri_data,outliers)
+        fixed_ts_peaks=np.delete(ts_peaks_data,outliers)
+        return {"rri":fixed_rri, "ts_peaks":fixed_ts_peaks,"outlier_num":len(outliers)}
+    
+    def calculate_peaks(self,ecg_np:np.array,fix:bool=True)->dict:
+        ts_peaks,ts,filtered=self.find_peaks(ecg_np)
         rri = np.diff(ts_peaks) * 1000
         original_rri=rri
-        
-        def box_hide_fix_rri(rri_data,ts_peaks_data):
-            # 第1四分位数 (Q1) と第3四分位数 (Q3) を計算
-            q1 = np.percentile(rri_data, 25)
-            q3 = np.percentile(rri_data, 75)
-            
-            # IQR (四分位範囲) を計算
-            iqr = q3 - q1
-            
-            # 外れ値の閾値を計算
-            # 1.5だと外れ値以外も外れ値にしてしまう気がする
-            lower_bound = q1 - 1.5 * iqr
-            upper_bound = q3 + 1.5 * iqr
-            
-            # 外れ値のインデックスを取得
-            outliers = np.where((rri_data < lower_bound) | (rri_data > upper_bound))[0]
-            fixed_rri_data = np.delete(rri_data, outliers)
-            fixed_ts_peaks_data=np.delete(ts_peaks_data, outliers)
-            return {"rri":fixed_rri_data, "ts_peaks":fixed_ts_peaks_data,"outlier_num":len(outliers)}
-            
-        
-        def fix_rri(rri_data,ts_peaks_data):
-            _rri=rri_data
-            _ts_peaks=ts_peaks_data
-            while True:
-                rri_mean=np.mean(_rri)
-                # まず、指定の条件に合うデータを見つけて delete_index に格納
-                condition = np.logical_or(_rri < rri_mean * 0.6, _rri > rri_mean * 1.4)
-                delete_candidate_index = np.where(condition)
-                if len(delete_candidate_index[0])==0:
-                    break
-                # 条件に合うデータのみを抽出
-                filtered_data = _rri[condition]
-
-                # 抽出したデータの中で rri_data - rri_mean の絶対値が最大のものを見つける
-                max_abs_diff_index = np.argmax(np.abs(filtered_data - rri_mean))
-
-                # 最大絶対値の差を持つデータのインデックスを取得
-                delete_index = delete_candidate_index[0][max_abs_diff_index]
-                _rri=np.delete(_rri,delete_index)
-                _ts_peaks=np.delete(_ts_peaks,delete_index)
-            fixed_rri=_rri
-            fixed_ts_peaks=_ts_peaks
-            return {"rri":fixed_rri, "ts_peaks":fixed_ts_peaks}
-        def easy_fix_rri(rri_data,ts_peaks_data):
-            delete_index=np.where(np.logical_or(rri_data < 650, rri_data > 1000))
-            fixed_rri=np.delete(rri_data,delete_index)
-            fixed_ts_peaks=np.delete(ts_peaks_data,delete_index)
-            return {"rri":fixed_rri, "ts_peaks":fixed_ts_peaks}
         
         outlier_num=None
         print("original rri:",original_rri)
         if fix:
-            fixed_data=box_hide_fix_rri(rri,ts_peaks)
+            fixed_data=self.easy_fix_rri(rri,ts_peaks)
             rri=fixed_data["rri"]
             ts_peaks =fixed_data["ts_peaks"] 
             outlier_num=fixed_data["outlier_num"]
+            
+        return {"ts_peaks":ts_peaks,"rri":rri,"outlier_num":outlier_num,"original_rri":original_rri,"ts":ts,"filtered":filtered}
+            
+    def calculate_parameters(self,ts_peaks,rri,outlier_num,original_rri):
         self.outlier_num=outlier_num
         self.max_beat=1.0/(np.min(rri)/1000/60)#1分あたりの回数
         self.min_beat=1.0/(np.max(rri)/1000/60)
@@ -116,11 +129,11 @@ class ECG_analysis():
         x = np.arange(ts_peaks[0], ts_peaks[-2], 0.05)
         y = spline_func(x)
 
-        sdnn = np.std(rri_1sec)
+        sdnn = np.std(rri)
         self.sdnn = sdnn
-        # rriの分散
+        # rriの標準偏差
         print("sdnn:", sdnn)
-
+    
         fft_rri = np.fft.fft(y)
         amp_fft_rri = np.abs(fft_rri)
         N = len(y)  # データの点数
@@ -151,7 +164,78 @@ class ECG_analysis():
         self.hf_lf_rate=self.hf/self.lf
         print("hf:", self.hf)
         print("lf/hf:", self.hf_lf_rate)
-        return {"ts_peaks":ts_peaks,"rri":rri,"x":x,"y":y,"ts_1sec":ts_1sec,"rri_1sec":rri_1sec,"frequencies":frequencies,"amp_fft_rri":amp_fft_rri,"mean_beat":self.mean_beat,"outlier_num":outlier_num,"original_rri":original_rri}
+        
+        if(self.before10s_rri!=None):
+            normalized_rri=rri/self.before10s_rri
+            self.normalized_sdnn=np.std(normalized_rri)
+            self.normalized_max_rri=np.max(normalized_rri)
+            self.normalized_min_rri=np.min(normalized_rri)
+            self.normalized_mean_rri=np.mean(normalized_rri)
+        
+        return {"x":x,"y":y,"ts_1sec":ts_1sec,"rri_1sec":rri_1sec,"frequencies":frequencies,"amp_fft_rri":amp_fft_rri}
+    
+        
+    
+    
+    def calculate_before10s_mean_rate(self,before10s_np,fix:bool=True):
+        ts_peaks,ts,filtered=self.find_peaks(before10s_np)
+        rri = np.diff(ts_peaks) * 1000
+        outlier_num=None
+        if fix:
+            fixed_data=self.easy_fix_rri(rri,ts_peaks)
+            rri=fixed_data["rri"]
+            ts_peaks =fixed_data["ts_peaks"] 
+            outlier_num=fixed_data["outlier_num"]
+        return np.mean(rri)
+    
+    def get_result(self,fix:bool=True,before10s_res=None):
+        if(fix):
+            if(before10s_res==None):
+                before10s_res,before10s_index=self.choose_best_rri_data(self.before10s_df.values[:, 4]*(-1),self.before10s_df.values[:, 2],self.before10s_df.values[:, 3],self.before10s_df.values[:, 6],self.before10s_df.values[:, 7])
+            self.before10s_rri=np.mean(before10s_res["rri"])
+            res,index=self.choose_best_rri_data(self.ecg_df.values[:, 4]*(-1),self.ecg_df.values[:, 2],self.ecg_df.values[:, 3],self.ecg_df.values[:, 6],self.ecg_df.values[:, 7])
+        else:
+            if(before10s_res==None):
+                before10s_res=self.calculate_peaks(self.ecg_df.values[:, 4]*(-1),fix)
+            self.before10s_rri=np.mean(before10s_res["rri"])
+            res_peaks=self.calculate_peaks(self.ecg_df.values[:, 4]*(-1),fix)
+            res={**self.calculate_parameters(**res_peaks),**res_peaks}
+        self.ts=res["ts"]
+        self.filtered_data=res["filtered"]
+
+        return res,before10s_res
+    
+    def analyze_single(self,show:bool=True,store:bool=True,font_size:int=12,fix:bool=True):
+        res,before10s_res=self.get_result(fix=fix)
+        self.show_single_all(res=res,show=show,store=store,font_size=font_size)
+        return res,before10s_res
+        
+    
+    def choose_best_rri_data(self,*data_list):
+        """一番使いたいデータを可変引数の一番最初に持ってきてください．そうすると，外れ値の数が同じときに一番使いたいデータの計算結果を返します．"""
+        res_list=[]
+        min_outlier=None
+        min_outliers_idx=0
+        for i,data in enumerate(data_list):
+            res=self.calculate_peaks(data,fix=True)
+            res_list.append(res)
+            if(min_outlier==None):
+                min_outlier=res["outlier_num"]
+                min_outliers_idx=i
+            elif(res["outlier_num"]<min_outlier):
+                min_outlier=res["outlier_num"]
+                min_outliers_idx=i
+            else:
+                pass
+            print(i,":",res["outlier_num"])
+        print("min_outliers_idx:",min_outliers_idx,"\nmin_outlier:",min_outlier)
+        self.outlier_num=min_outlier
+        self.used_df_num=min_outliers_idx
+        self.outlier_rate=min_outlier/len(res_list[min_outliers_idx]["original_rri"])
+        used_res=res_list[min_outliers_idx]
+        graph_elements=self.calculate_parameters(used_res["ts_peaks"],used_res["rri"],used_res["outlier_num"],used_res["original_rri"])
+        
+        return {**used_res,**graph_elements},min_outliers_idx
     
     def show_single_rri(self,ts_peaks,rri,ts_1sec,rri_1sec,x,y,show:bool=True,store:bool=True,font_size:int=12):
          # グラフを描画
@@ -166,7 +250,6 @@ class ECG_analysis():
         plt.ylabel('RRI [ms]')
         plt.grid()
         plt.legend()
-        fig_hold=fig
         
         if store:
             if not os.path.exists(os.path.join(self.path_to_data_dir,self.analysis_path,"RRI")):
@@ -176,9 +259,7 @@ class ECG_analysis():
             plt.show()
         else:
             plt.close()
-            
-        return fig_hold
-            
+                        
     def show_single_fft(self,frequencies,amp_fft_rri,show:bool=True,store:bool=True,font_size:int=12):
         fig = plt.figure(figsize=(16,12))
         plt.rcParams["font.size"] = font_size
@@ -189,7 +270,6 @@ class ECG_analysis():
         plt.grid()
         plt.xlim(0, 1)
         plt.ylim(0, 50000)
-        fig_hold=fig
 
         if store:
 
@@ -201,7 +281,6 @@ class ECG_analysis():
         else:
             plt.close()
             
-        return fig_hold
             
     def show_beat_wave(self,ts_peaks,rri,ts_1sec,rri_1sec,x,y,show:bool=True,store:bool=True,font_size:int=12):
         fig = plt.figure(figsize=(16,12))
@@ -232,13 +311,9 @@ class ECG_analysis():
             plt.show()
         else:
             plt.close()
-        
-        
-    def show_single(self,show:bool=True,store:bool=True,font_size:int=12,fix:bool=True):
-        if(fix):
-            res,index=self.choose_best_rri_data(self.ecg_df.values[:, 4]*(-1),self.ecg_df.values[:, 2],self.ecg_df.values[:, 3],self.ecg_df.values[:, 6],self.ecg_df.values[:, 7])
-        else:
-            res=self.calculate(self.ecg_df.values[:, 4]*(-1),fix)
+            
+            
+    def show_single_all(self,res,show:bool=True,store:bool=True,font_size:int=12):
         ts_peaks=res["ts_peaks"]
         rri=res["rri"]
         x=res["x"]
@@ -247,11 +322,10 @@ class ECG_analysis():
         rri_1sec=res["rri_1sec"]
         frequencies=res["frequencies"]
         amp_fft_rri=res["amp_fft_rri"]
-        print(rri)
         self.show_single_rri(ts_peaks,rri,ts_1sec,rri_1sec,x,y,show,store,font_size)
         self.show_single_fft(frequencies,amp_fft_rri,show,store,font_size)
         self.show_beat_wave(ts_peaks,rri,ts_1sec,rri_1sec,x,y,show,store,font_size)
-        return res
+        
         
     def show_multiple_rri(self,calculate_res_list,n,filename,titles:list=[],large_title:str=None,show:bool=True,store:bool=True,font_size:int=12):
         def make1graph(ts_peaks,rri,ts_1sec,rri_1sec,x,y,n,index,titles:list=[]):
@@ -314,51 +388,7 @@ class ECG_analysis():
         if store:
 
             plt.close()
-            
-            
-    def show_multi_mean_beat(self,calculate_res_list,filename,titles:list[str],large_title:str,show:bool=True,store:bool=True,font_size:int=12):
-        data1=[]
-        for res in calculate_res_list:
-            data1.append(res["mean_beat"])
-                # サンプルデータ
-        categories = titles
 
-
-        # グラフの幅
-        bar_width = 0.35
-        
-        if(len(categories)==0):
-            categories=self.experiment_nums
-
-        # インデックス
-        indices = np.arange(len(categories))
-
-        # データ1の棒グラフ
-        plt.bar(indices, data1, bar_width, label='平均の心拍数')
-        plt.ylim(bottom=50)
-        plt.ylabel('heart rate(/min)')
-
-        # カテゴリ名を設定
-        plt.xticks(indices + bar_width / 2, categories)
-
-        # 凡例を表示
-        plt.legend()
-        if(large_title):
-        # グラフのタイトルと軸ラベル
-            plt.title(large_title)
-        plt.tight_layout()
-
-
-        if store:
-
-            if not os.path.exists(os.path.join(self.path_to_data_dir,self.analysis_path,"mean_heart_rate")):
-                os.makedirs(os.path.join(self.path_to_data_dir,self.analysis_path,"mean_heart_rate"))
-            plt.savefig(os.path.join(self.path_to_data_dir,self.analysis_path,"mean_heart_rate",f"heart_rate_{filename}.png"))
-        if show:
-            plt.show()
-        else:
-            plt.close()
-            
             
     def show_multiple(self,titles:list=[],large_title_rri:str=None,large_title_fft:str=None,large_title_mean_beat:str=None,show:bool=True,store:bool=True,font_size:int=12,fix:bool=True):
         n=len(self.ecg_dfs)
@@ -374,31 +404,8 @@ class ECG_analysis():
             filename+=str(experiment_num)
         self.show_multiple_rri(res_list,n,filename,titles,large_title_rri,show,store,font_size)
         self.show_multiple_fft(res_list,n,filename,titles,large_title_fft,show,store,font_size)
-        self.show_multi_mean_beat(res_list,filename,titles,large_title_mean_beat,show,store,font_size)
 
 
-    def choose_best_rri_data(self,*data_list):
-        """一番使いたいデータを可変引数の一番最初に持ってきてください．そうすると，外れ値の数が同じときに一番使いたいデータの計算結果を返します．"""
-        res_list=[]
-        min_outlier=None
-        min_outliers_idx=0
-        for i,data in enumerate(data_list):
-            res=self.calculate(data,fix=True)
-            res_list.append(res)
-            if(min_outlier==None):
-                min_outlier=res["outlier_num"]
-                min_outliers_idx=i
-            elif(res["outlier_num"]<min_outlier):
-                min_outlier=res["outlier_num"]
-                min_outliers_idx=i
-            else:
-                pass
-            print(i,":",res["outlier_num"])
-        print("min_outliers_idx:",min_outliers_idx,"\nmin_outlier:",min_outlier)
-        self.outlier_num=min_outlier
-        self.used_df_num=min_outliers_idx
-        self.outlier_rate=min_outlier/len(res_list[min_outliers_idx]["original_rri"])
-        return res_list[min_outliers_idx],min_outliers_idx
         
         
             

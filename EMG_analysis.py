@@ -181,9 +181,6 @@ class EMG_analysis():
         self.analysis_path=os.path.join("解析データ",str(subject_num),"EMG")
         self.emg_dfs={}
         
-        
-    def convert_to_arv(self,np_data):
-        return np.abs(np_data)
 
     def calculate_rms(self,np_data):
         return np.sqrt(np.mean(np.square(np_data)))
@@ -220,7 +217,7 @@ class EMG_analysis():
             value=None
         
         if(normalization_method == 'mean'):
-            number_of_divide=np.mean(emg_data)
+            number_of_divide=np.mean(np.abs(emg_data))
         elif(normalization_method == 'scenario1'):
             if(self.scenario1value==None):
                 self.scenario1value =value

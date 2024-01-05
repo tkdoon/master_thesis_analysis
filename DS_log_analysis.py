@@ -22,55 +22,107 @@ class DS_log_analysis():
             os.makedirs(os.path.join(path_to_data_dir,self.analysis_path))
         self.acceleration=None
         self.min_difference=None
+        self.difference_variance=None
+        self.difference_cv=None
         self.relative_velocity=None
         self.DS_log_dfs:list=dfs
         self.experiment_nums=experiment_nums
         self.path_to_data_dir=path_to_data_dir
         self.rms_acceleration=None
+        self.acceleration_variance=None
+        self.acceleration_cv=None
         self.rms_steering_angle=None
         self.accelerator_variance=None
         self.accelerator_mean=None
+        self.accelerator_rms=None
+        self.accelerator_vdv=None
+        self.accelerator_cv=None
         self.brake_variance=None
         self.brake_mean=None
+        self.brake_rms=None
+        self.brake_vdv=None
+        self.brake_cv=None
         self.max_velocity=None
         self.velocity_variance=None
+        self.velocity_cv=None
         self.velocity_mean=None
         self.max_yaw=None
         self.yaw_variance=None
+        self.yaw_cv=None
         
-    def delete_velocity_zero(self,data:np.array):
+    def delete_velocity_zero(self,data):
         nonzero_indices = np.nonzero(self.velocity_array)[0]
         return data[nonzero_indices]
     
-    def calculate_parameters(self,delete_zero:bool):
+    def calculate_vdv(self,np_data):
+        # 配列の4乗を計算
+        array_pow_4 = np.power(np_data, 4)
+
+        # 4乗平均を計算
+        mean_pow_4 = np.mean(array_pow_4)
+
+        # 4乗根を計算
+        fourth_root = np.power(mean_pow_4, 1/4)
+        return fourth_root
+    
+    def calculate_parameters(self,delete_zero:bool,initial_yaw):
         self.acceleration=np.sqrt(np.sum(self.DS_log_np[:,28:31]**2, axis=1))
+        difference_array=self.calculate_distance_of_vehicles(car_position=self.DS_log_np[:,3:5]#(x,y)
+                                                                   ,bus_position=self.DS_log_np[:,36:38]#(x,y)
+                                                                   )
         if(delete_zero):
             self.rms_steering_angle=np.sqrt(np.mean(np.square(self.delete_velocity_zero(self.DS_log_np[:,1]))))
-            self.accelerator_variance=np.var(self.delete_velocity_zero(self.DS_log_np[:,12]))
-            self.accelerator_mean=np.mean(self.delete_velocity_zero(self.DS_log_np[:,12]))
-            self.brake_variance=np.var(self.delete_velocity_zero(self.DS_log_np[:,13]))
-            self.brake_mean=np.mean(self.delete_velocity_zero(self.DS_log_np[:,13]))
-            self.rms_acceleration = np.sqrt(np.mean(np.square(self.delete_velocity_zero(self.acceleration))))
-            self.acceleration_variance=np.var(self.delete_velocity_zero(self.acceleration))
-            self.velocity_variance=np.var(self.delete_velocity_zero(self.velocity_array))
-            self.velocity_mean=np.mean(self.delete_velocity_zero(self.velocity_array))
-            self.yaw_variance=np.var(self.delete_velocity_zero(self.DS_log_np[:,21]))
+            dz_accelerator=self.delete_velocity_zero(self.DS_log_np[:,12])
+            self.accelerator_variance=np.var(dz_accelerator)
+            self.accelerator_mean=np.mean(dz_accelerator)
+            self.accelerator_rms=np.sqrt(np.mean(np.square(dz_accelerator)))
+            self.accelerator_vdv=self.calculate_vdv(dz_accelerator)
+            self.accelerator_cv=np.std(dz_accelerator)/self.accelerator_mean
+            dz_brake=self.delete_velocity_zero(self.DS_log_np[:,13])
+            self.brake_variance=np.var(dz_brake)
+            self.brake_mean=np.mean(dz_brake)
+            self.brake_rms=np.sqrt(np.mean(np.square(dz_brake)))
+            self.brake_vdv=self.calculate_vdv(dz_brake)
+            self.brake_cv=np.std(dz_brake)/self.brake_mean
+            dz_acceleration=self.delete_velocity_zero(self.acceleration)
+            self.rms_acceleration = np.sqrt(np.mean(np.square(dz_acceleration)))
+            self.acceleration_variance=np.var(dz_acceleration)
+            self.acceleration_cv=np.std(dz_acceleration)/np.mean(dz_acceleration)
+            dz_velocity=self.delete_velocity_zero(self.velocity_array)
+            self.velocity_variance=np.var(dz_velocity)
+            self.velocity_mean=np.mean(dz_velocity)
+            self.velocity_cv=np.std(dz_velocity)/np.mean(dz_velocity)
+            dz_yaw=self.delete_velocity_zero(self.DS_log_np[:,21])
+            self.yaw_variance=np.var(dz_yaw)
+            self.yaw_cv=np.std(dz_yaw)/np.mean(dz_yaw)
+            dz_difference=self.delete_velocity_zero(difference_array)
+            self.difference_variance=np.var(dz_difference)
+            self.difference_cv=np.std(dz_difference)/np.mean(dz_difference)
         else:
             self.rms_steering_angle=np.sqrt(np.mean(np.square(self.DS_log_np[:,1])))
             self.accelerator_variance=np.var(self.DS_log_np[:,12])
             self.accelerator_mean=np.mean(self.DS_log_np[:,12])
+            self.accelerator_rms=np.sqrt(np.mean(np.square(self.DS_log_np[:,12])))
+            self.accelerator_vdv=self.calculate_vdv(self.DS_log_np[:,12])
+            self.accelerator_cv=np.std(self.DS_log_np[:,12])/self.accelerator_mean
             self.brake_variance=np.var(self.DS_log_np[:,13])
             self.brake_mean=np.mean(self.DS_log_np[:,13])
+            self.brake_rms=np.sqrt(np.mean(np.square(self.DS_log_np[:,13])))
+            self.brake_vdv=self.calculate_vdv(self.DS_log_np[:,13])
+            self.brake_cv=np.std(self.DS_log_np[:,13])/self.brake_mean
             self.rms_acceleration = np.sqrt(np.mean(np.square(self.acceleration)))
             self.acceleration_variance=np.var(self.acceleration)
+            self.acceleration_cv=np.std(self.acceleration)/np.mean(self.acceleration)
             self.velocity_variance=np.var(self.velocity_array)
             self.velocity_mean=np.mean(self.velocity_array)
+            self.velocity_cv=np.std(self.velocity_array)/np.mean(self.velocity_array)
             self.yaw_variance=np.var(self.DS_log_np[:,21])
-        self.min_difference=np.min(self.calculate_distance_of_vehicles(car_position=self.DS_log_np[:,3:5]#(x,y)
-                                                                   ,bus_position=self.DS_log_np[:,36:38]#(x,y)
-                                                                   ))
+            self.yaw_cv=np.std(self.DS_log_np[:,21])/np.mean(self.DS_log_np[:,21])
+            self.difference_variance=np.var(difference_array)
+            self.difference_cv=np.std(difference_array)/np.mean(difference_array)
+        self.min_difference=np.min(difference_array)
         self.max_velocity=np.max(self.velocity_array)
-        self.max_yaw=np.max(np.abs(self.DS_log_np[:,21]))
+        self.max_yaw=np.max(np.abs(self.DS_log_np[:,21]-initial_yaw))
         return
 
     def calculate_acceleration(self,velocity_array,times_np,acceleration_vector_array):
@@ -459,7 +511,7 @@ class DS_log_analysis():
     def show_yaw(self,store:bool=True,show:bool=True,font_size:int=12):
         fig=plt.figure(figsize=(16,12))
         plt.rcParams["font.size"] = font_size
-        plt.plot(self.times_np,self.DS_log_np[:,21],label="yaw angle")
+        plt.plot(self.times_np,self.DS_log_np[:,21]-self.DS_log_np[0,21],label="yaw angle")
         plt.title('Yaw angle')
         plt.xlabel('time (s)')
         plt.ylabel('angle(deg)')
@@ -504,7 +556,7 @@ class DS_log_analysis():
         else:
             plt.close()
         
-    def analyze_all(self,store:bool=True,show:bool=True,font_size:int=12):
+    def show_all(self,store:bool=True,show:bool=True,font_size:int=12):
         self.show_velocity(store,show,font_size)
         self.show_distance_of_vehicles(store,show,font_size)
         self.show_relative_velocity(store,show,font_size)

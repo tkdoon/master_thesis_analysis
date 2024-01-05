@@ -20,7 +20,8 @@ def search_index_in_DSlog(DS_log_df:pd.DataFrame,search_for:str):
     if search_for=="speed down start":
         return speed_down_start_index
     elif search_for=="speed down end":
-        min_speed_index=np.where(bus_velocity_array==min_velocity)[0]
+        min_velocity=np.min(bus_velocity_array[speed_down_start_index:])
+        min_speed_index=np.where(bus_velocity_array[speed_down_start_index:]==min_velocity)[0]+speed_down_start_index
         speed_down_end_index=min_speed_index[0]
         return speed_down_end_index
     elif search_for=="speed up start":

@@ -41,6 +41,8 @@ class Time_fitting():
         self.polymate_time=None
         self.DS_log_time:np.array=self.DS_log_df.values[:,11]
         self.path_to_data_dir=path_to_data_dir
+        self.sampling_rate=2000#Hz
+        self.before10s_df=None
         
 
     def rtc_to_real_time_all(self,delay:float=0)->list[datetime]:
@@ -103,8 +105,9 @@ class Time_fitting():
                 
         index=self.calculate_polymate_index(self.smarteye_time,self.polymate_time)
         self.time_fit_polymate_df=self.polymate_df.iloc[index[0]:index[1]+1].reset_index(drop=True)
+        self.before10s_df=self.polymate_df.iloc[index[0]-self.sampling_rate*10:index[0]].reset_index(drop=True)
         # print("fit polymate dataframe",self.time_fit_polymate_df)
-        return self.time_fit_polymate_df
+        return self.time_fit_polymate_df,self.before10s_df
     
     def seconds_to_smarteye_index(self,smarteye_time:list[datetime],second:float):
         start_time=smarteye_time[0]
