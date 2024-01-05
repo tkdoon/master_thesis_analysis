@@ -197,8 +197,7 @@ class Time_fitting():
         seconds_difference=time_difference.total_seconds()
         return seconds_difference
     
-    def cut_video(self):
-        output_file_name = f'cut{self.experiment_num}.mp4'
+    def cut_video(self,output_file_name):
         # 出力フォルダが存在しない場合、作成する
         if not os.path.exists(self.cut_video_output_folder):
             os.makedirs(self.cut_video_output_folder)
