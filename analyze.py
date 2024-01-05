@@ -9,18 +9,17 @@ import json
 import os
 import pandas as pd
 
-def main():
-    subject_num=4
+def main(subject_num):
     print("被験者番号:",subject_num)
-    delay=48 if subject_num==2 else 35 if subject_num==1 else 52
+    delay=48 if subject_num==2 else 35 if subject_num==1 else 62 if subject_num==3 else 52
     path_to_data_dir=r"C:\Users\tyasu\Desktop\修士研究用"
     # path_to_data_dir=r"/content/drive/MyDrive"
-    # experiment_num=1
 
     dfs_list=[]
     parameter_list=[]
     emg_obj=EMG_analysis(subject_num=subject_num)
     for experiment_num in range(1,24):
+        # experiment_num=1
         print("実験番号:",experiment_num)
         dfs=read_df(path_to_data_dir=path_to_data_dir,subject_num=subject_num,experiment_num=experiment_num)
         experiment_info=create_experiment_info(dfs["DS_log_df"],experiment_num)
@@ -40,7 +39,7 @@ def main():
             emg_value_list.append(emg_percent)
             emg_obj.show_emg_graph(emg_df=polymate_df,experiment_num=experiment_num,path_to_data_dir=path_to_data_dir,store=True,show=False,n=idx)
             emg_obj.show_polymate_graph(polymate_df,experiment_num=experiment_num,path_to_data_dir=path_to_data_dir,store=True,show=False,n=idx)
-        # time_obj.cut_video()
+        time_obj.cut_video(output_file_name = f'cut{experiment_num}.mp4')
         ecg_obj=ECG_analysis(subject_num=subject_num,experiment_num=experiment_num,ecg_df=polymate_df,path_to_data_dir=path_to_data_dir,before10s_df=before10s_df)
         res,before10s_res=ecg_obj.analyze_single(False,True,fix=True,font_size=16)
 
@@ -81,6 +80,7 @@ def main():
             short_polymate_df,_=time_obj_short.time_fitting_polymate(check_delay=False)
             short_smarteye_df_without_stoptime=time_obj_short.time_fitting_smarteye(delete_during_stop=True)
             short_DS_log_df=time_obj_short.time_fitting_DS_log()
+            time_obj_short.cut_video(output_file_name = f'cut{experiment_num}short{i}.mp4')
             short_ecg_obj=ECG_analysis(subject_num=subject_num,experiment_num=experiment_num,ecg_df=short_polymate_df,path_to_data_dir=path_to_data_dir,before10s_df=before10s_df)
             short_ecg_obj.get_result(before10s_res=before10s_res,fix=True)
             short_ds_log_obj=DS_log_analysis(experiment_num=experiment_num,subject_num=subject_num,df=short_DS_log_df,path_to_data_dir=path_to_data_dir)
@@ -129,4 +129,4 @@ def read_df(path_to_data_dir,subject_num,experiment_num):
         return {"smarteye_df":smarteye_df,"polymate_df":polymate_df,"DS_log_df":DS_log_df}
 
 if __name__ == '__main__':
-    main()
+    main(4)
