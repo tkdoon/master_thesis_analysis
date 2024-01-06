@@ -219,15 +219,17 @@ class ECG_analysis():
         for i,data in enumerate(data_list):
             res=self.calculate_peaks(data,fix=True)
             res_list.append(res)
-            if(min_outlier==None):
+            if(min_outlier==None and len(res["original_rri"])>=4):
                 min_outlier=res["outlier_num"]
                 min_outliers_idx=i
-            elif(res["outlier_num"]<min_outlier):
+            elif(res["outlier_num"]<min_outlier and len(res["original_rri"])>=4):
                 min_outlier=res["outlier_num"]
                 min_outliers_idx=i
             else:
                 pass
             print(i,":",res["outlier_num"])
+            if(res["outlier_num"]==0 and len(res["original_rri"])>=4):
+                break
         print("min_outliers_idx:",min_outliers_idx,"\nmin_outlier:",min_outlier)
         self.outlier_num=min_outlier
         self.used_df_num=min_outliers_idx

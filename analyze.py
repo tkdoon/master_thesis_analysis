@@ -19,7 +19,9 @@ def main(subject_num):
     parameter_list=[]
     emg_obj=EMG_analysis(subject_num=subject_num)
     for experiment_num in range(1,24):
-        # experiment_num=1
+        experiment_num=experiment_num+20
+        if experiment_num==4:
+            break
         print("実験番号:",experiment_num)
         dfs=read_df(path_to_data_dir=path_to_data_dir,subject_num=subject_num,experiment_num=experiment_num)
         experiment_info=create_experiment_info(dfs["DS_log_df"],experiment_num)
@@ -29,17 +31,17 @@ def main(subject_num):
         smarteye_df=time_obj.time_fitting_smarteye(delete_during_stop=False)
         smarteye_df_without_stoptime=time_obj.time_fitting_smarteye(delete_during_stop=True)
         DS_log_df=time_obj.time_fitting_DS_log()
-        dfs_list.append([polymate_df, smarteye_df, DS_log_df])
-        polymate_dfs4emg=[]
-        for emg_time in experiment_info["emg"]:
-            polymate_dfs4emg.append(time_obj.time_fitting_polymate4emg(emg_time["before_time"],emg_time["after_time"]))
-        emg_value_list=[]
-        for idx,polymate_df4emg in enumerate(polymate_dfs4emg):
-            emg_percent=emg_obj.main(polymate_df4emg,"vdv","mean")
-            emg_value_list.append(emg_percent)
-            emg_obj.show_emg_graph(emg_df=polymate_df,experiment_num=experiment_num,path_to_data_dir=path_to_data_dir,store=True,show=False,n=idx)
-            emg_obj.show_polymate_graph(polymate_df,experiment_num=experiment_num,path_to_data_dir=path_to_data_dir,store=True,show=False,n=idx)
-        time_obj.cut_video(output_file_name = f'cut{experiment_num}.mp4')
+        # dfs_list.append([polymate_df, smarteye_df, DS_log_df])
+        # polymate_dfs4emg=[]
+        # for emg_time in experiment_info["emg"]:
+        #     polymate_dfs4emg.append(time_obj.time_fitting_polymate4emg(emg_time["before_time"],emg_time["after_time"]))
+        # emg_value_list=[]
+        # for idx,polymate_df4emg in enumerate(polymate_dfs4emg):
+        #     emg_percent=emg_obj.main(polymate_df4emg,"vdv","mean")
+        #     emg_value_list.append(emg_percent)
+        #     emg_obj.show_emg_graph(emg_df=polymate_df,experiment_num=experiment_num,path_to_data_dir=path_to_data_dir,store=True,show=False,n=idx)
+        #     emg_obj.show_polymate_graph(polymate_df,experiment_num=experiment_num,path_to_data_dir=path_to_data_dir,store=True,show=False,n=idx)
+        # time_obj.cut_video(output_file_name = f'cut{experiment_num}.mp4')
         ecg_obj=ECG_analysis(subject_num=subject_num,experiment_num=experiment_num,ecg_df=polymate_df,path_to_data_dir=path_to_data_dir,before10s_df=before10s_df)
         res,before10s_res=ecg_obj.analyze_single(False,True,fix=True,font_size=16)
 
@@ -59,11 +61,11 @@ def main(subject_num):
         ds_log_obj=DS_log_analysis(experiment_num=experiment_num,subject_num=subject_num,df=DS_log_df,path_to_data_dir=path_to_data_dir)
         ds_log_obj.show_all(show=False)
         ds_log_obj.calculate_parameters(experiment_info["delete_zero"],dfs["DS_log_df"].values[0,21])
-        smarteye_obj=Smarteye_analysis(subject_num=subject_num,experiment_num=experiment_num,smarteye_df=smarteye_df,path_to_data_dir=path_to_data_dir)
-        smarteye_obj.show_single_all(show=False)
-        smarteye_obj.calculate_parameters()
-        smarteye_obj_without_stoptime=Smarteye_analysis(subject_num=subject_num,experiment_num=experiment_num,smarteye_df=smarteye_df_without_stoptime,path_to_data_dir=path_to_data_dir)
-        smarteye_obj_without_stoptime.calculate_parameters()
+        # smarteye_obj=Smarteye_analysis(subject_num=subject_num,experiment_num=experiment_num,smarteye_df=smarteye_df,path_to_data_dir=path_to_data_dir)
+        # smarteye_obj.show_single_all(show=False)
+        # smarteye_obj.calculate_parameters()
+        # smarteye_obj_without_stoptime=Smarteye_analysis(subject_num=subject_num,experiment_num=experiment_num,smarteye_df=smarteye_df_without_stoptime,path_to_data_dir=path_to_data_dir)
+        # smarteye_obj_without_stoptime.calculate_parameters()
         
         nasatlx_obj=Nasatlx_analysis(subject_num=subject_num,path_to_data_dir=path_to_data_dir)
         dictionary=nasatlx_obj.open_file()
@@ -73,21 +75,21 @@ def main(subject_num):
         overall_workload=float(result["calculatedResult"]["results_overall"])
         
         
-        parameter_list.append([experiment_num,ecg_obj.hf,ecg_obj.lf,ecg_obj.hf_lf_rate,ecg_obj.normalized_max_rri,ecg_obj.normalized_min_rri,ecg_obj.normalized_mean_rri,ecg_obj.normalized_sdnn,ecg_obj.used_df_num,ecg_obj.outlier_num,ecg_obj.outlier_rate,ds_log_obj.accelerator_mean,ds_log_obj.accelerator_variance,ds_log_obj.accelerator_rms,ds_log_obj.accelerator_vdv,ds_log_obj.accelerator_cv,ds_log_obj.brake_mean,ds_log_obj.brake_variance,ds_log_obj.brake_rms,ds_log_obj.brake_vdv,ds_log_obj.brake_cv,ds_log_obj.min_difference,ds_log_obj.difference_variance,ds_log_obj.difference_cv,ds_log_obj.rms_acceleration,ds_log_obj.acceleration_variance,ds_log_obj.acceleration_cv,ds_log_obj.rms_steering_angle,ds_log_obj.max_velocity,ds_log_obj.velocity_variance,ds_log_obj.velocity_mean,ds_log_obj.velocity_cv,ds_log_obj.max_yaw,ds_log_obj.yaw_variance,ds_log_obj.yaw_cv,smarteye_obj_without_stoptime.mean_distance,smarteye_obj_without_stoptime.max_size,smarteye_obj_without_stoptime.min_size,smarteye_obj_without_stoptime.mean_size,smarteye_obj_without_stoptime.prc,frustration,overall_workload,*emg_value_list])
+        # parameter_list.append([experiment_num,ecg_obj.hf,ecg_obj.lf,ecg_obj.hf_lf_rate,ecg_obj.normalized_max_rri,ecg_obj.normalized_min_rri,ecg_obj.normalized_mean_rri,ecg_obj.normalized_sdnn,ecg_obj.used_df_num,ecg_obj.outlier_num,ecg_obj.outlier_rate,ds_log_obj.accelerator_mean,ds_log_obj.accelerator_variance,ds_log_obj.accelerator_rms,ds_log_obj.accelerator_vdv,ds_log_obj.accelerator_cv,ds_log_obj.brake_mean,ds_log_obj.brake_variance,ds_log_obj.brake_rms,ds_log_obj.brake_vdv,ds_log_obj.brake_cv,ds_log_obj.min_difference,ds_log_obj.difference_variance,ds_log_obj.difference_cv,ds_log_obj.rms_acceleration,ds_log_obj.acceleration_variance,ds_log_obj.acceleration_cv,ds_log_obj.rms_steering_angle,ds_log_obj.max_velocity,ds_log_obj.velocity_variance,ds_log_obj.velocity_mean,ds_log_obj.velocity_cv,ds_log_obj.max_yaw,ds_log_obj.yaw_variance,ds_log_obj.yaw_cv,smarteye_obj_without_stoptime.mean_distance,smarteye_obj_without_stoptime.max_size,smarteye_obj_without_stoptime.min_size,smarteye_obj_without_stoptime.mean_size,smarteye_obj_without_stoptime.prc,frustration,overall_workload,*emg_value_list])
         
         for i,time in enumerate(experiment_info["short_time"]):
             time_obj_short=Time_fitting(experiment_num=experiment_num,subject_num=subject_num,before_time=time["before_time"],after_time=time["after_time"],delay=delay,path_to_data_dir=path_to_data_dir,**dfs)
             short_polymate_df,_=time_obj_short.time_fitting_polymate(check_delay=False)
             short_smarteye_df_without_stoptime=time_obj_short.time_fitting_smarteye(delete_during_stop=True)
             short_DS_log_df=time_obj_short.time_fitting_DS_log()
-            time_obj_short.cut_video(output_file_name = f'cut{experiment_num}short{i}.mp4')
+            # time_obj_short.cut_video(output_file_name = f'cut{experiment_num}short{i}.mp4')
             short_ecg_obj=ECG_analysis(subject_num=subject_num,experiment_num=experiment_num,ecg_df=short_polymate_df,path_to_data_dir=path_to_data_dir,before10s_df=before10s_df)
             short_ecg_obj.get_result(before10s_res=before10s_res,fix=True)
             short_ds_log_obj=DS_log_analysis(experiment_num=experiment_num,subject_num=subject_num,df=short_DS_log_df,path_to_data_dir=path_to_data_dir)
             short_ds_log_obj.calculate_parameters(experiment_info["delete_zero"],dfs["DS_log_df"].values[0,21])
-            short_smarteye_obj=Smarteye_analysis(subject_num=subject_num,experiment_num=experiment_num,smarteye_df=short_smarteye_df_without_stoptime,path_to_data_dir=path_to_data_dir)
-            short_smarteye_obj.calculate_parameters()
-            parameter_list.append([experiment_num,short_ecg_obj.hf,short_ecg_obj.lf,short_ecg_obj.hf_lf_rate,short_ecg_obj.normalized_max_rri,short_ecg_obj.normalized_min_rri,short_ecg_obj.normalized_mean_rri,short_ecg_obj.normalized_sdnn,short_ecg_obj.used_df_num,short_ecg_obj.outlier_num,short_ecg_obj.outlier_rate,short_ds_log_obj.accelerator_mean,short_ds_log_obj.accelerator_variance,short_ds_log_obj.accelerator_rms,short_ds_log_obj.accelerator_vdv,short_ds_log_obj.accelerator_cv,short_ds_log_obj.brake_mean,short_ds_log_obj.brake_variance,short_ds_log_obj.brake_rms,short_ds_log_obj.brake_vdv,short_ds_log_obj.brake_cv,short_ds_log_obj.min_difference,short_ds_log_obj.difference_variance,short_ds_log_obj.difference_cv,short_ds_log_obj.rms_acceleration,short_ds_log_obj.acceleration_variance,short_ds_log_obj.acceleration_cv,short_ds_log_obj.rms_steering_angle,short_ds_log_obj.max_velocity,short_ds_log_obj.velocity_variance,short_ds_log_obj.velocity_mean,short_ds_log_obj.velocity_cv,short_ds_log_obj.yaw_cv,short_ds_log_obj.max_yaw,short_ds_log_obj.yaw_variance,short_ds_log_obj.yaw_cv,short_smarteye_obj.mean_distance,short_smarteye_obj.max_size,short_smarteye_obj.min_size,short_smarteye_obj.mean_size,short_smarteye_obj.prc,frustration,overall_workload,emg_value_list[i]])
+            # short_smarteye_obj=Smarteye_analysis(subject_num=subject_num,experiment_num=experiment_num,smarteye_df=short_smarteye_df_without_stoptime,path_to_data_dir=path_to_data_dir)
+            # short_smarteye_obj.calculate_parameters()
+            # parameter_list.append([experiment_num,short_ecg_obj.hf,short_ecg_obj.lf,short_ecg_obj.hf_lf_rate,short_ecg_obj.normalized_max_rri,short_ecg_obj.normalized_min_rri,short_ecg_obj.normalized_mean_rri,short_ecg_obj.normalized_sdnn,short_ecg_obj.used_df_num,short_ecg_obj.outlier_num,short_ecg_obj.outlier_rate,short_ds_log_obj.accelerator_mean,short_ds_log_obj.accelerator_variance,short_ds_log_obj.accelerator_rms,short_ds_log_obj.accelerator_vdv,short_ds_log_obj.accelerator_cv,short_ds_log_obj.brake_mean,short_ds_log_obj.brake_variance,short_ds_log_obj.brake_rms,short_ds_log_obj.brake_vdv,short_ds_log_obj.brake_cv,short_ds_log_obj.min_difference,short_ds_log_obj.difference_variance,short_ds_log_obj.difference_cv,short_ds_log_obj.rms_acceleration,short_ds_log_obj.acceleration_variance,short_ds_log_obj.acceleration_cv,short_ds_log_obj.rms_steering_angle,short_ds_log_obj.max_velocity,short_ds_log_obj.velocity_variance,short_ds_log_obj.velocity_mean,short_ds_log_obj.velocity_cv,short_ds_log_obj.max_yaw,short_ds_log_obj.yaw_variance,short_ds_log_obj.yaw_cv,short_smarteye_obj.mean_distance,short_smarteye_obj.max_size,short_smarteye_obj.min_size,short_smarteye_obj.mean_size,short_smarteye_obj.prc,frustration,overall_workload,emg_value_list[i]])
             
     
     large_key_list=[None,"ECG",None,None,None,None,None,None,None,None,None,"DS log",None,None,None,None,None,None,None,None,None,None,None,None,None,None,None,None,None,None,None,None,None,None,None,"smarteye",None,None,None,None,"NASA TLX",None,"EMG"]

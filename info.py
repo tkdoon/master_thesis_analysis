@@ -176,38 +176,38 @@ def create_experiment_info(DS_log_df:pd.DataFrame,experiment_num:int)->dict:
     
     experiment_info=[
         # 直進（バスが減速を始めるところから，信号が青に変わるまでと，信号が青に変わってからバスが加速し終わって3秒後まで）
-        {"before_search_for":"speed down start","after_search_for":"speed up end","after_time_after_event":5,"time":[{"before_search_for":"speed down start","after_search_for":"speed up start","after_time_after_event":0},{"before_search_for":"speed up start","after_search_for":"speed up end","after_time_after_event":5}],"delete_zero":True,"emg":[{"start":"speed down start","end":"speed down end"},{"start":"speed up start","end":"speed up end"}]},
-        {"before_search_for":"speed down start","after_search_for":"speed up end","after_time_after_event":5,"time":[{"before_search_for":"speed down start","after_search_for":"speed up start","after_time_after_event":0},{"before_search_for":"speed up start","after_search_for":"speed up end","after_time_after_event":5}],"delete_zero":True,"emg":[{"start":"speed down start","end":"speed down end"},{"start":"speed up start","end":"speed up end"}]},
-        {"before_search_for":"speed down start","after_search_for":"speed up end","after_time_after_event":5,"time":[{"before_search_for":"speed down start","after_search_for":"speed up start","after_time_after_event":0},{"before_search_for":"speed up start","after_search_for":"speed up end","after_time_after_event":5}],"delete_zero":True,"emg":[{"start":"speed down start","end":"speed down end"},{"start":"speed up start","end":"speed up end"}]},
-        {"before_search_for":"speed down start","after_search_for":"speed up end","after_time_after_event":5,"time":[{"before_search_for":"speed down start","after_search_for":"speed up start","after_time_after_event":0},{"before_search_for":"speed up start","after_search_for":"speed up end","after_time_after_event":5}],"delete_zero":True,"emg":[{"start":"speed down start","end":"speed down end"},{"start":"speed up start","end":"speed up end"}]},
-        {"before_search_for":"speed down start","after_search_for":"speed up end","after_time_after_event":5,"time":[{"before_search_for":"speed down start","after_search_for":"speed up start","after_time_after_event":0},{"before_search_for":"speed up start","after_search_for":"speed up end","after_time_after_event":5}],"delete_zero":True,"emg":[{"start":"speed down start","end":"speed down end"},{"start":"speed up start","end":"speed up end"}]},
+        {"before_search_for":"speed down start","after_search_for":"speed up end","after_time_after_event":5,"time":[{"before_search_for":"speed down start","after_search_for":"speed up start","after_time_after_event":0},{"before_search_for":"speed up start","after_search_for":"speed up end","after_time_after_event":5}],"delete_zero":True,"emg":[{"start":"speed down start","end":"speed down end","after_time_after_event":0},{"start":"speed up start","end":"speed up end","after_time_after_event":0}]},
+        {"before_search_for":"speed down start","after_search_for":"speed up end","after_time_after_event":5,"time":[{"before_search_for":"speed down start","after_search_for":"speed up start","after_time_after_event":0},{"before_search_for":"speed up start","after_search_for":"speed up end","after_time_after_event":5}],"delete_zero":True,"emg":[{"start":"speed down start","end":"speed down end","after_time_after_event":0},{"start":"speed up start","end":"speed up end","after_time_after_event":0}]},
+        {"before_search_for":"speed down start","after_search_for":"speed up end","after_time_after_event":5,"time":[{"before_search_for":"speed down start","after_search_for":"speed up start","after_time_after_event":0},{"before_search_for":"speed up start","after_search_for":"speed up end","after_time_after_event":5}],"delete_zero":True,"emg":[{"start":"speed down start","end":"speed down end","after_time_after_event":0},{"start":"speed up start","end":"speed up end","after_time_after_event":0}]},
+        {"before_search_for":"speed down start","after_search_for":"speed up end","after_time_after_event":5,"time":[{"before_search_for":"speed down start","after_search_for":"speed up start","after_time_after_event":0},{"before_search_for":"speed up start","after_search_for":"speed up end","after_time_after_event":5}],"delete_zero":True,"emg":[{"start":"speed down start","end":"speed down end","after_time_after_event":0},{"start":"speed up start","end":"speed up end","after_time_after_event":0}]},
+        {"before_search_for":"speed down start","after_search_for":"speed up end","after_time_after_event":5,"time":[{"before_search_for":"speed down start","after_search_for":"speed up start","after_time_after_event":0},{"before_search_for":"speed up start","after_search_for":"speed up end","after_time_after_event":5}],"delete_zero":True,"emg":[{"start":"speed down start","end":"speed down end","after_time_after_event":0},{"start":"speed up start","end":"speed up end","after_time_after_event":0}]},
 
         # バス＝左折，自車＝直進（バスが減速を終了するところから，交差点通過後5秒）
-        {"before_search_for":"speed down end","after_search_for":"speed up start","after_time_after_event":8,"delete_zero":False,"emg":[{"start":"speed down end","end":"speed up start"}]},
-        {"before_search_for":"speed down end","after_search_for":"speed up start","after_time_after_event":8,"delete_zero":False,"emg":[{"start":"speed down end","end":"speed up start"}]},
-        {"before_search_for":"speed down end","after_search_for":"speed up start","after_time_after_event":8,"delete_zero":False,"emg":[{"start":"speed down end","end":"speed up start"}]},
+        {"before_search_for":"speed down end","after_search_for":"speed up start","after_time_after_event":8,"delete_zero":False,"emg":[{"start":"speed down end","end":"speed up start","after_time_after_event":0}]},
+        {"before_search_for":"speed down end","after_search_for":"speed up start","after_time_after_event":8,"delete_zero":False,"emg":[{"start":"speed down end","end":"speed up start","after_time_after_event":0}]},
+        {"before_search_for":"speed down end","after_search_for":"speed up start","after_time_after_event":8,"delete_zero":False,"emg":[{"start":"speed down end","end":"speed up start","after_time_after_event":0}]},
 
         # バス=左折，自車＝左折（バスが減速を終了するところから，左折後加速し終わった後8秒）
-        {"before_search_for":"speed down end","after_search_for":"speed up end","after_time_after_event":10,"delete_zero":False,"emg":[{"start":"speed down end","end":"speed up start"}]},
-        {"before_search_for":"speed down end","after_search_for":"speed up end","after_time_after_event":10,"delete_zero":False,"emg":[{"start":"speed down end","end":"speed up start"}]},
-        {"before_search_for":"speed down end","after_search_for":"speed up end","after_time_after_event":10,"delete_zero":False,"emg":[{"start":"speed down end","end":"speed up start"}]},
+        {"before_search_for":"speed down end","after_search_for":"speed up end","after_time_after_event":10,"delete_zero":False,"emg":[{"start":"speed down end","end":"speed up start","after_time_after_event":0}]},
+        {"before_search_for":"speed down end","after_search_for":"speed up end","after_time_after_event":10,"delete_zero":False,"emg":[{"start":"speed down end","end":"speed up start","after_time_after_event":0}]},
+        {"before_search_for":"speed down end","after_search_for":"speed up end","after_time_after_event":10,"delete_zero":False,"emg":[{"start":"speed down end","end":"speed up start","after_time_after_event":0}]},
 
         # バス=右折，自車＝直進（バスが減速を終了するところから，交差点通過後5秒）
-        {"before_search_for":"speed down end","after_search_for":"speed up start","after_time_after_event":8,"delete_zero":False,"emg":[{"start":"speed down end","end":"speed up start"}]},
-        {"before_search_for":"speed down end","after_search_for":"speed up start","after_time_after_event":8,"delete_zero":False,"emg":[{"start":"speed down end","end":"speed up start"}]},
-        {"before_search_for":"speed down end","after_search_for":"speed up start","after_time_after_event":8,"delete_zero":False,"emg":[{"start":"speed down end","end":"speed up start"}]},
+        {"before_search_for":"speed down end","after_search_for":"speed up start","after_time_after_event":8,"delete_zero":False,"emg":[{"start":"speed down end","end":"speed up start","after_time_after_event":0}]},
+        {"before_search_for":"speed down end","after_search_for":"speed up start","after_time_after_event":8,"delete_zero":False,"emg":[{"start":"speed down end","end":"speed up start","after_time_after_event":0}]},
+        {"before_search_for":"speed down end","after_search_for":"speed up start","after_time_after_event":8,"delete_zero":False,"emg":[{"start":"speed down end","end":"speed up start","after_time_after_event":0}]},
         # バス＝右折，自車＝右折（バスが減速を終了するところから，右折後加速し終わった後8秒）
-        {"before_search_for":"speed down end","after_search_for":"speed up end","after_time_after_event":10,"delete_zero":False,"emg":[{"start":"speed down end","end":"speed up start"}]},
-        {"before_search_for":"speed down end","after_search_for":"speed up end","after_time_after_event":10,"delete_zero":False,"emg":[{"start":"speed down end","end":"speed up start"}]},
-        {"before_search_for":"speed down end","after_search_for":"speed up end","after_time_after_event":10,"delete_zero":False,"emg":[{"start":"speed down end","end":"speed up start"}]},
+        {"before_search_for":"speed down end","after_search_for":"speed up end","after_time_after_event":10,"delete_zero":False,"emg":[{"start":"speed down end","end":"speed up start","after_time_after_event":0}]},
+        {"before_search_for":"speed down end","after_search_for":"speed up end","after_time_after_event":10,"delete_zero":False,"emg":[{"start":"speed down end","end":"speed up start","after_time_after_event":0}]},
+        {"before_search_for":"speed down end","after_search_for":"speed up end","after_time_after_event":10,"delete_zero":False,"emg":[{"start":"speed down end","end":"speed up start","after_time_after_event":0}]},
         # バス＝右折，自車=直進，対向車（バスが減速を終了するところから，交差点通過後5秒）
-        {"before_search_for":"speed down end","after_search_for":"pass intersection end","after_time_after_event":8,"delete_zero":True,"emg":[{"start":"speed up start","end":"pass intersection end"}]},
-        {"before_search_for":"speed down end","after_search_for":"pass intersection end","after_time_after_event":8,"delete_zero":True,"emg":[{"start":"speed up start","end":"pass intersection end"}]},
-        {"before_search_for":"speed down end","after_search_for":"pass intersection end","after_time_after_event":8,"delete_zero":True,"emg":[{"start":"speed up start","end":"pass intersection end"}]},
+        {"before_search_for":"speed down end","after_search_for":"pass intersection end","after_time_after_event":8,"delete_zero":True,"emg":[{"start":"speed up start","end":"pass intersection end","after_time_after_event":0}]},
+        {"before_search_for":"speed down end","after_search_for":"pass intersection end","after_time_after_event":8,"delete_zero":True,"emg":[{"start":"speed up start","end":"pass intersection end","after_time_after_event":0}]},
+        {"before_search_for":"speed down end","after_search_for":"pass intersection end","after_time_after_event":8,"delete_zero":True,"emg":[{"start":"speed up start","end":"pass intersection end","after_time_after_event":0}]},
         # バス＝右折，自車＝右折，対向車（バスが減速を終了するところから，右折後加速し終わった後8秒）
-        {"before_search_for":"speed down end","after_search_for":"pass intersection end","after_time_after_event":25,"delete_zero":True,"emg":[{"start":"speed up start","end":"pass intersection end"}]},
-        {"before_search_for":"speed down end","after_search_for":"pass intersection end","after_time_after_event":25,"delete_zero":True,"emg":[{"start":"speed up start","end":"pass intersection end"}]},
-        {"before_search_for":"speed down end","after_search_for":"pass intersection end","after_time_after_event":25,"delete_zero":True,"emg":[{"start":"speed up start","end":"pass intersection end"}]},
+        {"before_search_for":"other car1 passed","after_search_for":"other car1 passed","after_time_after_event":10,"delete_zero":False,"emg":[{"start":"other car1 passed","end":"other car1 passed","after_time_after_event":5}]},
+        {"before_search_for":"other car2 passed","after_search_for":"other car2 passed","after_time_after_event":10,"delete_zero":False,"emg":[{"start":"other car2 passed","end":"other car2 passed","after_time_after_event":5}]},
+        {"before_search_for":"other car3 passed","after_search_for":"other car3 passed","after_time_after_event":10,"delete_zero":False,"emg":[{"start":"other car3 passed","end":"other car3 passed","after_time_after_event":5}]},
         ]
 
     before_time_index=search_index_in_DSlog(DS_log_df,experiment_info[experiment_num-1]["before_search_for"])
@@ -219,7 +219,7 @@ def create_experiment_info(DS_log_df:pd.DataFrame,experiment_num:int)->dict:
         emg_before_time_index=search_index_in_DSlog(DS_log_df,start_end["start"])
         emg_before_time=DS_log_index2second(DS_log_df,emg_before_time_index)
         emg_after_time_index=search_index_in_DSlog(DS_log_df,start_end["end"])
-        emg_after_time=DS_log_index2second(DS_log_df,emg_after_time_index)
+        emg_after_time=DS_log_index2second(DS_log_df,emg_after_time_index)+start_end["after_time_after_event"]
         emg_time.append({"before_time":emg_before_time, "after_time":emg_after_time})
         
     short_time=[]

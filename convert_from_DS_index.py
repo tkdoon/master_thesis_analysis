@@ -41,6 +41,12 @@ def search_index_in_DSlog(DS_log_df:pd.DataFrame,search_for:str):
         zero_indices = np.where(your_car_velocity_array==0)[0]
         print(zero_indices.shape)
         return zero_indices
+    elif search_for=="other car1 passed":
+        return 4604
+    elif search_for=="other car2 passed":
+        return 6084
+    elif search_for=="other car3 passed":
+        return 7828
     else:
         return None
 

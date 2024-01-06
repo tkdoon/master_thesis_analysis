@@ -73,7 +73,10 @@ def repeated_anova(alpha,*data_list):
     print(aov)
     p_value=aov.anova_table["Pr > F"]
     return p_value < alpha,p_value
-    
+
+def friedman(alpha,*data_list):
+    t_statistic,p_value=stats.friedmanchisquare(*data_list)
+    return p_value < alpha,p_value
     
 def kruskal_wolis(alpha,*data_list):
     """_summary_
@@ -153,7 +156,7 @@ def statistical_analysis(*data_list):
         else:
             return p_value,False
     elif(len(data_list)>=3 and not normality):
-        difference,p_value=kruskal_wolis(0.05, *data_list)    
+        difference,p_value=friedman(0.05, *data_list)    
         if (difference):
             combinations_list = list(combinations(data_list, 2))
             res=[]
