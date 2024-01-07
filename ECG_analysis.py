@@ -102,17 +102,29 @@ class ECG_analysis():
         return {"rri":fixed_rri, "ts_peaks":fixed_ts_peaks,"outlier_num":len(outliers)}
     
     def calculate_peaks(self,ecg_np:np.array,fix:bool=True)->dict:
-        ts_peaks,ts,filtered=self.find_peaks(ecg_np)
-        rri = np.diff(ts_peaks) * 1000
-        original_rri=rri
+        try:
+            ts_peaks,ts,filtered=self.find_peaks(ecg_np)
+            rri = np.diff(ts_peaks) * 1000
+            original_rri=rri
+            outlier_num=None
+            print("original rri:",original_rri)
+            if fix:
+                fixed_data=self.easy_fix_rri(rri,ts_peaks)
+                rri=fixed_data["rri"]
+                ts_peaks =fixed_data["ts_peaks"] 
+                outlier_num=fixed_data["outlier_num"]
+        except ValueError as e:
+            if "Not enough beats to compute heart rate." in str(e):
+                print("Not enough beats to compute heart rate.")
+                original_rri=[]
+                rri=[]
+                outlier_num=None
+                ts_peaks=None
+                ts=None
+                filtered=None
+            else:
+                raise ValueError("another error occurred while computing")
         
-        outlier_num=None
-        print("original rri:",original_rri)
-        if fix:
-            fixed_data=self.easy_fix_rri(rri,ts_peaks)
-            rri=fixed_data["rri"]
-            ts_peaks =fixed_data["ts_peaks"] 
-            outlier_num=fixed_data["outlier_num"]
             
         return {"ts_peaks":ts_peaks,"rri":rri,"outlier_num":outlier_num,"original_rri":original_rri,"ts":ts,"filtered":filtered}
             
