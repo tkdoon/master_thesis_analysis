@@ -222,6 +222,8 @@ class ECG_analysis():
             if(min_outlier==None and len(res["original_rri"])>=4):
                 min_outlier=res["outlier_num"]
                 min_outliers_idx=i
+            elif(min_outlier==None):
+                continue
             elif(res["outlier_num"]<min_outlier and len(res["original_rri"])>=4):
                 min_outlier=res["outlier_num"]
                 min_outliers_idx=i
