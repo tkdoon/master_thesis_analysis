@@ -43,8 +43,23 @@ def main(subject_num):
             emg_obj.show_polymate_graph(polymate_df,experiment_num=experiment_num,path_to_data_dir=path_to_data_dir,store=True,show=False,n=idx)
         time_obj.cut_video(output_file_name = f'cut{experiment_num}.mp4')
         ecg_obj=ECG_analysis(subject_num=subject_num,experiment_num=experiment_num,ecg_df=polymate_df,path_to_data_dir=path_to_data_dir,before10s_df=before10s_df)
-        res,before10s_res=ecg_obj.analyze_single(False,True,fix=True,font_size=16)
-
+        try:
+            res,before10s_res=ecg_obj.analyze_single(False,True,fix=True,font_size=16)
+        except TypeError as e:
+            if("unsupported operand type(s) for /: 'NoneType' and 'int'" in str(e)):
+                before10s_res=None
+                ecg_obj.hf=None
+                ecg_obj.lf=None
+                ecg_obj.hf_lf_rate=None
+                ecg_obj.normalized_max_rri=None
+                ecg_obj.normalized_min_rri=None
+                ecg_obj.normalized_mean_rri=None
+                ecg_obj.normalized_sdnn=None
+                ecg_obj.used_df_num=None
+                ecg_obj.outlier_num=None
+                ecg_obj.outlier_rate=None
+            else:
+                raise TypeError(e)
         # emg_res=emg_analysis(polymate_df,experiment_num=experiment_num,subject_num=subject_num,show=False,path_to_data_dir=path_to_data_dir)
         # show_emg_graph(polymate_df,subject_num=subject_num,experiment_num=experiment_num,show=False)
         # burst_list=check_burst(polymate_df,subject_num=subject_num,experiment_num=experiment_num,path_to_data_dir=path_to_data_dir)
@@ -84,7 +99,23 @@ def main(subject_num):
             short_DS_log_df=time_obj_short.time_fitting_DS_log()
             # time_obj_short.cut_video(output_file_name = f'cut{experiment_num}short{i}.mp4')
             short_ecg_obj=ECG_analysis(subject_num=subject_num,experiment_num=experiment_num,ecg_df=short_polymate_df,path_to_data_dir=path_to_data_dir,before10s_df=before10s_df)
-            short_ecg_obj.get_result(before10s_res=before10s_res,fix=True)
+            try:
+                short_ecg_obj.get_result(before10s_res=before10s_res,fix=True)
+            except TypeError as e:
+                if("unsupported operand type(s) for /: 'NoneType' and 'int'" in str(e)):
+                    before10s_res=None
+                    short_ecg_obj.hf=None
+                    short_ecg_obj.lf=None
+                    short_ecg_obj.hf_lf_rate=None
+                    short_ecg_obj.normalized_max_rri=None
+                    short_ecg_obj.normalized_min_rri=None
+                    short_ecg_obj.normalized_mean_rri=None
+                    short_ecg_obj.normalized_sdnn=None
+                    short_ecg_obj.used_df_num=None
+                    short_ecg_obj.outlier_num=None
+                    short_ecg_obj.outlier_rate=None
+                else:
+                    raise TypeError(e)
             short_ds_log_obj=DS_log_analysis(experiment_num=experiment_num,subject_num=subject_num,df=short_DS_log_df,path_to_data_dir=path_to_data_dir)
             short_ds_log_obj.calculate_parameters(experiment_info["delete_zero"],dfs["DS_log_df"].values[0,21])
             short_smarteye_obj=Smarteye_analysis(subject_num=subject_num,experiment_num=experiment_num,smarteye_df=short_smarteye_df_without_stoptime,path_to_data_dir=path_to_data_dir)

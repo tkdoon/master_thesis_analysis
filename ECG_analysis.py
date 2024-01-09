@@ -95,8 +95,8 @@ class ECG_analysis():
         return {"rri":fixed_rri, "ts_peaks":fixed_ts_peaks}
     
     def easy_fix_rri(self,rri_data,ts_peaks_data):
-        rri_mean=np.mean(rri_data)
-        outliers=np.where(np.logical_or(rri_data < rri_mean*0.6, rri_data > rri_mean*1.4))[0]
+        rri_median=np.median(rri_data)
+        outliers=np.where(np.logical_or(rri_data < rri_median*0.6, rri_data > rri_median*1.4))[0]
         fixed_rri=np.delete(rri_data,outliers)
         fixed_ts_peaks=np.delete(ts_peaks_data,outliers)
         return {"rri":fixed_rri, "ts_peaks":fixed_ts_peaks,"outlier_num":len(outliers)}
