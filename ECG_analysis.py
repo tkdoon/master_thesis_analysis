@@ -40,6 +40,7 @@ class ECG_analysis():
 
         
     def find_peaks(self,ecg_np):
+        print(ecg_np.shape)
         ecg_data = ecg.ecg(
             signal=ecg_np, sampling_rate=2000., show=False, interactive=False)
 
@@ -144,7 +145,7 @@ class ECG_analysis():
         except Exception as e:
             print("Error spline:",e)
             rri_1sec=np.arange(ts_peaks[0], ts_peaks[-2], 1)
-            y=x
+            y=xy
             
         sdnn = np.std(rri)
         self.sdnn = sdnn
