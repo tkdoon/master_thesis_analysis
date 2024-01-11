@@ -145,7 +145,7 @@ class ECG_analysis():
         except Exception as e:
             print("Error spline:",e)
             rri_1sec=np.arange(ts_peaks[0], ts_peaks[-2], 1)
-            y=xy
+            y=x
             
         sdnn = np.std(rri)
         self.sdnn = sdnn
