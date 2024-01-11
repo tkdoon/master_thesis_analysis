@@ -23,3 +23,8 @@ def calculate_real_time(rtc_value,delay)->datetime.datetime:
     # 実際の時間を出力
     # print(actual_datetime_japan)
     return actual_datetime_japan
+
+
+
+if __name__=="__main__":
+    print(calculate_real_time(133489923502794000,0))

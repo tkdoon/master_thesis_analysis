@@ -135,12 +135,17 @@ class ECG_analysis():
         self.mean_beat=1.0/(np.mean(rri)/1000/60)
         print(f"max:{self.max_beat}回/min\nmin:{self.min_beat}回/min\nmean:{self.mean_beat}回/min")                  
         print("fixed rri:", rri)
-        spline_func = scipy.interpolate.interp1d(ts_peaks[:-1], rri, kind='cubic')
         ts_1sec = np.arange(ts_peaks[0], ts_peaks[-2], 1)
-        rri_1sec = spline_func(ts_1sec).round(6)
         x = np.arange(ts_peaks[0], ts_peaks[-2], 0.05)
-        y = spline_func(x)
-
+        try:
+            spline_func = scipy.interpolate.interp1d(ts_peaks[:-1], rri, kind='cubic')
+            rri_1sec = spline_func(ts_1sec).round(6)
+            y = spline_func(x)
+        except Exception as e:
+            print("Error spline:",e)
+            rri_1sec=np.arange(ts_peaks[0], ts_peaks[-2], 1)
+            y=x
+            
         sdnn = np.std(rri)
         self.sdnn = sdnn
         # rriの標準偏差

@@ -18,8 +18,7 @@ def shapiro_wilk(alpha,data:list):
     """
     # シャピロ-ウィルク検定の実行
     statistic, p_value = stats.shapiro(data)
-
-    return p_value < alpha
+    return p_value < alpha,p_value
 
 def QQplot(data):
     # 正規QQプロットの作成
@@ -31,7 +30,7 @@ def QQplot(data):
     plt.title('Normal QQ Plot')
     plt.show()
     
-def paired_t_test(alpha,data1,data2):
+def paired_t_test(data1,data2,alpha=0.05):
     """_summary_
     統計的な有意差が認められればTrue，認められなければFalseを返す．
     Args:
@@ -45,7 +44,7 @@ def paired_t_test(alpha,data1,data2):
     t_statistic,p_value=stats.ttest_rel(data1, data2)
     return p_value < alpha,p_value
 
-def wilcoxon(alpha,data1,data2):
+def wilcoxon(data1,data2,alpha=0.05):
     """_summary_
     統計的な有意差が認められればTrue，認められなければFalseを返す．
     Args:
@@ -101,11 +100,11 @@ compare_list=[
 
 def main():
     df_list=[]
-    for i in range(1,24):
-        # read_path=f{i}
+    for i in range(3,15):
+        read_path=fr"C:\Users\tyasu\Desktop\修士研究用\解析データ\parameters{i}.csv"
         df=read_df(read_path)
         df_list.append(df)
-    
+    print(3)
     
     for analyze_item in analyze_list:
         data_list=[]
@@ -123,13 +122,22 @@ def main():
                 prepared_list.append(temp_list)
             res.append(statistical_analysis(*prepared_list))
             
-        # write_path=f{analyze_item}    
+        write_path=fr"C:\Users\tyasu\Desktop\修士研究用\解析データ\{analyze_item}.csv"    
         write_csv(write_path,*res)
-                
+        
+        
+def holm_method(alpha=0.05,*p_values):
+    sorted_p_list = sorted(p_values)
+    indices_in_sorted_list = [sorted_p_list.index(value) for value in p_values]
+    fixed_p_list=[p*(len(p_values)-i) for i,p in enumerate(sorted_p_list)]
+    difference_list=[fixed_p<0.05 for fixed_p in fixed_p_list]
+    return difference_list,fixed_p_list,indices_in_sorted_list
+               
                     
 def statistical_analysis(*data_list):
     for data in data_list:
-        print("シャピロウィルク:",shapiro_wilk(data))
+        normality,normality_p=shapiro_wilk(data)
+        print("シャピロウィルク","p値：",normality_p,"正規性あり" if normality else "正規性なし")
         QQplot(data)
         judge=input()
     
@@ -140,31 +148,43 @@ def statistical_analysis(*data_list):
     
     if(len(data_list)==2 and normality):
         difference,p_value=paired_t_test(0.05, data_list[0],data_list[1])
+        print("対応のあるｔ検定","有意差あり：" if difference else "有意差なし","p値：",p_value)
         return p_value,difference
     elif(len(data_list)==2 and not normality):
         difference,p_value=wilcoxon(0.05, data_list[0], data_list[1])
+        print("wilcoxonの符号順位検定","有意差あり：" if difference else "有意差なし","p値：",p_value)
         return p_value,difference
     elif(len(data_list)>=3 and normality):
         difference,p_value=repeated_anova(0.05,*data_list)
         if (difference):
+            print("反復測定ANOVA","有意差あり：","p値：",p_value)
             combinations_list = list(combinations(data_list, 2))
-            res=[]
+            p_list=[]
             for combi in combinations_list:
-                each_difference,each_p_value=paired_t_test(0.05/(len(data_list)-1),combi[0],combi[1])
-                res.append((combi,each_difference,each_p_value)) 
+                each_difference,each_p_value=paired_t_test(combi[0],combi[1])
+                p_list.append(each_p_value)
+            difference_list,fixed_p_list,indices_in_sorted_list=holm_method(0.05,*p_list)  
+            res=[[combinations_list[i],difference_list[indice],fixed_p_list[indice]] for i,indice in enumerate(indices_in_sorted_list)]
+            print("対応のあるｔ検定（多重比較）",res)
             return p_value,res
         else:
+            print("反復測定ANOVA","有意差なし","p値：",p_value)
             return p_value,False
     elif(len(data_list)>=3 and not normality):
         difference,p_value=friedman(0.05, *data_list)    
         if (difference):
+            print("friedman","有意差あり：","p値：",p_value)
             combinations_list = list(combinations(data_list, 2))
-            res=[]
+            p_list=[]
             for combi in combinations_list:
-                each_difference,each_p_value=wilcoxon(0.05/(len(data_list)-1),combi[0],combi[1])
-                res.append((combi,each_difference,each_p_value))
+                each_difference,each_p_value=wilcoxon(combi[0],combi[1])
+                p_list.append(each_p_value)
+            difference_list,fixed_p_list,indices_in_sorted_list=holm_method(0.05,*p_list)  
+            res=[[combinations_list[i],difference_list[indice],fixed_p_list[indice]] for i,indice in enumerate(indices_in_sorted_list)]
+            print("wilcoxon（多重比較）",res)
             return p_value,res
         else:
+            print("friedman","有意差なし：","p値：",p_value)
             return p_value,False
     else:
         return 
@@ -175,7 +195,7 @@ def statistical_analysis(*data_list):
     
     
 def read_df(path):
-    df = pd.read_csv(pd,header=1 )
+    df = pd.read_csv(path,header=1 )
     return df
 
 def write_csv(path,*args):
